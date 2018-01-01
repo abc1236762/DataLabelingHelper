@@ -1,0 +1,232 @@
+﻿<Window x:Class="Wikipedia_Question_Helper.ReAnswerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ReAnswerWindow" Width="960" Height="540" MinWidth="640" MinHeight="480" Background="#9F1E1E1E" Foreground="#FFDCDCDC" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="InputComboBox" Grid.Column="0" SelectionChanged="InputComboBox_SelectionChanged"/>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="2">
+                    <Run>共</Run>
+                    <Run x:Name="WordTotalRun">0</Run>
+                    <Run>字</Run>
+                </TextBlock>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="PreviousButton" Content="上一篇" Grid.Column="0" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" IsEnabled="False" Click="PreviousButton_Click"/>
+                <ComboBox x:Name="CurrentComboBox" Grid.Column="2" IsEnabled="False" SelectionChanged="CurrentComboBox_SelectionChanged"/>
+                <Button x:Name="NextButton" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Content="下一篇" Grid.Column="4" IsEnabled="False" Click="NextButton_Click"/>
+            </Grid>
+            <Grid Grid.Column="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="4" Text="大小" VerticalAlignment="Center"/>
+                <TextBox x:Name="FontSizeTextBox" Grid.Column="6" Text="24" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="FontSizeTextBox_TextChanged" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
+                <Button x:Name="SaveButton" Content="儲存段落和問答" Grid.Column="8" Click="SaveButton_Click" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False"/>
+            </Grid>
+        </Grid>
+        <Grid Grid.Column="1" Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <RichTextBox  Grid.Column="0" Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" AutoWordSelection="False" IsReadOnly="True" VerticalScrollBarVisibility="Auto">
+                <FlowDocument x:Name="ContextFlowDocument" FontSize="{Binding Text, ElementName=FontSizeTextBox}" Language="zh-tw">
+                    <FlowDocument.Resources>
+                        <Style TargetType="{x:Type Paragraph}">
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="FontSize" Value="{Binding Text, ElementName=FontSizeTextBox}"/>
+                        </Style>
+                    </FlowDocument.Resources>
+                </FlowDocument>
+            </RichTextBox>
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Center" Width="2" Background="#FF9B9B9B" Foreground="#FF9B9B9B"/>
+            <ScrollViewer Grid.Column="2"  VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Text="問題1" VerticalAlignment="Center" />
+                    <TextBox CaretBrush="#FFDCDCDC" x:Name="Question1TextBox" Grid.Column="2" Grid.Row="0" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" IsReadOnly="True" SelectionChanged="QuestionTextBox_SelectionChanged" LostFocus="AnswerTextBox_LostFocus"/>
+                    <TextBlock Grid.Column="0" Grid.Row="2" Text="答案1" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer1NumberTextBox" VerticalContentAlignment="Center" Grid.Column="0" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerNumberTextBox_GotFocus" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" Text="0" HorizontalContentAlignment="Center" IsEnabled="False" PreviewTextInput="AnswerNumberTextBox_PreviewTextInput" TextChanged="AnswerNumberTextBox_TextChanged"/>
+                        <Button x:Name="Answer1NumberButton" Grid.Column="1" Content="取&#xa;消" Padding="0" FontSize="12" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False" Click="AnswerNumberButton_Click"/>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer1TextBox" Grid.Column="3" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" TextChanged="AnswerTextBox_TextChanged" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerTextBox_GotFocus"  PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"/>
+                    </Grid>
+                    <TextBlock Grid.Column="0" Grid.Row="4" Text="問題2" VerticalAlignment="Center" />
+                    <TextBox CaretBrush="#FFDCDCDC" x:Name="Question2TextBox" Grid.Column="2" Grid.Row="4" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" IsReadOnly="True" SelectionChanged="QuestionTextBox_SelectionChanged" LostFocus="AnswerTextBox_LostFocus"/>
+                    <TextBlock Grid.Column="0" Grid.Row="6" Text="答案2" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer2NumberTextBox" VerticalContentAlignment="Center" Grid.Column="0" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerNumberTextBox_GotFocus" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" Text="0" HorizontalContentAlignment="Center" IsEnabled="False" PreviewTextInput="AnswerNumberTextBox_PreviewTextInput" TextChanged="AnswerNumberTextBox_TextChanged"/>
+                        <Button x:Name="Answer2NumberButton" Grid.Column="1" Content="取&#xa;消" Padding="0" FontSize="12" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False" Click="AnswerNumberButton_Click"/>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer2TextBox" Grid.Column="3" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" TextChanged="AnswerTextBox_TextChanged" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerTextBox_GotFocus"  PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"/>
+                    </Grid>
+                    <TextBlock Grid.Column="0" Grid.Row="8" Text="問題3" VerticalAlignment="Center" />
+                    <TextBox CaretBrush="#FFDCDCDC" x:Name="Question3TextBox" Grid.Column="2" Grid.Row="8" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"  IsReadOnly="True" SelectionChanged="QuestionTextBox_SelectionChanged" LostFocus="AnswerTextBox_LostFocus"/>
+                    <TextBlock Grid.Column="0" Grid.Row="10" Text="答案3" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer3NumberTextBox" VerticalContentAlignment="Center" Grid.Column="0" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerNumberTextBox_GotFocus" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" Text="0" HorizontalContentAlignment="Center" IsEnabled="False" PreviewTextInput="AnswerNumberTextBox_PreviewTextInput" TextChanged="AnswerNumberTextBox_TextChanged"/>
+                        <Button x:Name="Answer3NumberButton" Grid.Column="1" Content="取&#xa;消" Padding="0" FontSize="12" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False" Click="AnswerNumberButton_Click"/>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer3TextBox" Grid.Column="3" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" TextChanged="AnswerTextBox_TextChanged" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerTextBox_GotFocus"  PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"/>
+                    </Grid>
+                    <TextBlock Grid.Column="0" Grid.Row="12" Text="問題4" VerticalAlignment="Center" />
+                    <TextBox CaretBrush="#FFDCDCDC" x:Name="Question4TextBox" Grid.Column="2" Grid.Row="12" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" IsReadOnly="True" SelectionChanged="QuestionTextBox_SelectionChanged" LostFocus="AnswerTextBox_LostFocus"/>
+                    <TextBlock Grid.Column="0" Grid.Row="14" Text="答案4" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer4NumberTextBox" VerticalContentAlignment="Center" Grid.Column="0" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerNumberTextBox_GotFocus" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" Text="0" HorizontalContentAlignment="Center" IsEnabled="False" PreviewTextInput="AnswerNumberTextBox_PreviewTextInput" TextChanged="AnswerNumberTextBox_TextChanged"/>
+                        <Button x:Name="Answer4NumberButton" Grid.Column="1" Content="取&#xa;消" Padding="0" FontSize="12" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False" Click="AnswerNumberButton_Click"/>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer4TextBox" Grid.Column="3" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" TextChanged="AnswerTextBox_TextChanged" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerTextBox_GotFocus"  PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"/>
+                    </Grid>
+                    <TextBlock Grid.Column="0" Grid.Row="16" Text="問題5" VerticalAlignment="Center" />
+                    <TextBox CaretBrush="#FFDCDCDC" x:Name="Question5TextBox" Grid.Column="2" Grid.Row="16" TextWrapping="Wrap" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" IsReadOnly="True" SelectionChanged="QuestionTextBox_SelectionChanged" LostFocus="AnswerTextBox_LostFocus"/>
+                    <TextBlock Grid.Column="0" Grid.Row="18" Text="答案5" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer5NumberTextBox" VerticalContentAlignment="Center" Grid.Column="0" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerNumberTextBox_GotFocus" PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown" Text="0" HorizontalContentAlignment="Center" TextWrapping="Wrap" IsEnabled="False" PreviewTextInput="AnswerNumberTextBox_PreviewTextInput" TextChanged="AnswerNumberTextBox_TextChanged"/>
+                        <Button x:Name="Answer5NumberButton" Grid.Column="1" Content="取&#xa;消" Padding="0" FontSize="12" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC" IsEnabled="False" Click="AnswerNumberButton_Click"/>
+                        <TextBox CaretBrush="#FFDCDCDC" x:Name="Answer5TextBox" Grid.Column="3" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  FontSize="{Binding Text, ElementName=FontSizeTextBox}" TextChanged="AnswerTextBox_TextChanged" LostFocus="AnswerTextBox_LostFocus" GotFocus="AnswerTextBox_GotFocus"  PreviewKeyDown="QuestionAndAnswerTextBox_PreviewKeyDown"/>
+                    </Grid>
+                    <TextBlock Grid.Column="0" Grid.Row="20" Text="問題" VerticalAlignment="Center" />
+                    <Grid Grid.Column="2" Grid.Row="20">
+                        <ListBox x:Name="ProblemListBox" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" SelectionMode="Multiple" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="2.5">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Margin" Value="2.5"/>
+                                    <Setter Property="FontSize" Value="18"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="5"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Content="{TemplateBinding Tag}" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Foreground="#FFDCDCDC" Grid.Column="0" VerticalContentAlignment="Center"/>
+                                                    <TextBox Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Content}" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"  Grid.Column="2" VerticalContentAlignment="Stretch" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.Items>
+                                <ListBoxItem Tag="文中有空格" />
+                                <ListBoxItem Tag="文中有小／中括號" />
+                                <ListBoxItem Tag="文中的外文太多" />
+                                <ListBoxItem Tag="文中有可以試著翻譯成中文或取代成非外文符號的外文" />
+                                <ListBoxItem Tag="文章可修正" />
+                                <ListBoxItem Tag="問題1不妥" />
+                                <ListBoxItem Tag="問題2不妥" />
+                                <ListBoxItem Tag="問題3不妥" />
+                                <ListBoxItem Tag="問題4不妥" />
+                                <ListBoxItem Tag="問題5不妥" />
+                            </ListBox.Items>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+</Window>

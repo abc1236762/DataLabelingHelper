@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="Wikipedia_Question_Helper.ParagraphItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" HorizontalAlignment="Right" >
+                <Run>第</Run>
+                <Run x:Name="LineRun">0</Run>
+                <Run>行</Run>
+            </TextBlock>
+            <TextBlock Grid.Row="2" HorizontalAlignment="Right" >
+                <Run x:Name="CountRun">0</Run>
+                <Run>字</Run>
+            </TextBlock>
+            <Button x:Name="TagButton" Content="標記" Click="TagButton_Click" Grid.Row="4" Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
+        </Grid>
+        <RichTextBox x:Name="ContextRichTextBox" Grid.Column="3" Grid.Row="1" TextChanged="ContextRichTextBox_TextChanged" LostFocus="ContextRichTextBox_LostFocus" Foreground="#FF9B9B9B" Background="#7F1E1E1E" CaretBrush="#FFDCDCDC" BorderBrush="#FF9B9B9B" AutoWordSelection="False" UndoLimit="2147483647" >
+            <FlowDocument x:Name="ContextFlowDocument" FontSize="24" Language="zh-tw" >
+                <FlowDocument.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="FontSize" Value="{Binding FontSize, ElementName=ContextFlowDocument}"/>
+                    </Style>
+                </FlowDocument.Resources>
+            </FlowDocument>
+        </RichTextBox>
+    </Grid>
+</UserControl>

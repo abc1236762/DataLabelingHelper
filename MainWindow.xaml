@@ -1,0 +1,33 @@
+﻿<Window x:Class="Wikipedia_Question_Helper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" Background="#9F1E1E1E" Foreground="#FFDCDCDC" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="維基百科問題與答案標註器" Grid.Column="1" Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="#FFDCDCDC" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <TextBlock Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Text="選擇模式：" />
+        <Button x:Name="MakeQAButton" Content="問題與答案標註模式" Grid.Column="1" Grid.Row="5" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="MakeQAButton_Click"/>
+        <Button x:Name="EditQAButton" Content="問題與答案修改模式" Grid.Column="1" Grid.Row="7" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="EditQAButton_Click"/>
+        <Button x:Name="ReAnswerButton" Content="答案重新標註模式" Grid.Column="1" Grid.Row="9" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="ReAnswerButton_Click"/>
+    </Grid>
+</Window>
