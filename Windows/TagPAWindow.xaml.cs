@@ -1,0 +1,164 @@
+﻿using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Collections.Generic;
+using Microsoft.VisualBasic.FileIO;
+using System;
+using System.Windows.Documents;
+
+namespace DataLabelingHelper
+{
+	/// <summary>
+	/// TagPAWindow.xaml 的互動邏輯
+	/// </summary>
+	public partial class TagPAWindow : Window
+	{
+		private string dataFile;
+		private string questionID;
+
+		private struct Item
+		{
+			public readonly string Question;
+			public readonly string[] DocumentNames;
+			public readonly int AnswerID;
+			public readonly Dictionary<int, string> Option;
+
+			public Item(string[] data) {
+				this.Question = data[1];
+				this.DocumentNames = new string[10];
+				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
+				this.AnswerID = int.Parse(data[12]);
+				this.Option = new Dictionary<int, string>();
+				for (int i = 13; i < 29; i += 2) {
+					if (data[i] != string.Empty) this.Option.Add(int.Parse(data[i]), data[i + 1]);
+				}
+			}
+		}
+
+		private Dictionary<string, Item> data;
+
+		public TagPAWindow() {
+			this.InitializeComponent();
+
+			if (Directory.Exists("data\\tagqa\\")) {
+				this.InputComboBox.Items.Clear();
+				Directory.GetFiles("data\\tagqa\\", "*.csv").ToList().ForEach(filePath => {
+					this.InputComboBox.Items.Add(Path.GetFileNameWithoutExtension(filePath));
+				});
+				this.GetSelectedFile();
+			}
+		}
+
+		private void SaveSettings() {
+			var ConfigFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			var Settings = ConfigFile.AppSettings.Settings;
+			if (Settings["TagPA.DataFile"] == null) Settings.Add("TagPA.DataFile", this.dataFile);
+			else Settings["TagPA.DataFile"].Value = this.dataFile;
+			if (Settings["TagPA.QuestionID"] == null) Settings.Add("TagPA.QuestionID", this.questionID);
+			else Settings["TagPA.QuestionID"].Value = this.questionID;
+			ConfigFile.Save(ConfigurationSaveMode.Modified);
+		}
+
+		private void GetSelectedFile() {
+			this.dataFile = ConfigurationManager.AppSettings["TagPA.DataFile"] ?? this.dataFile;
+			if (this.InputComboBox.Items.Count > 0) {
+				if (this.dataFile == string.Empty) {
+					this.InputComboBox.SelectedIndex = 0;
+				} else {
+					var list = this.InputComboBox.Items.Cast<string>().Where(Item => Item == this.dataFile);
+					if (list.Count() != 1) this.InputComboBox.SelectedIndex = -1;
+					else this.InputComboBox.SelectedIndex = this.InputComboBox.Items.IndexOf(list.First());
+				}
+			} else this.InputComboBox.SelectedIndex = -1;
+		}
+
+		private void ParseData() {
+			string filePath = $"data\\tagqa\\{this.InputComboBox.SelectedItem as string}.csv";
+			TextFieldParser parser = new TextFieldParser(filePath) {
+				TextFieldType = FieldType.Delimited,
+			};
+			parser.SetDelimiters(",");
+
+			this.data = new Dictionary<string, Item>();
+			string[] title = parser.ReadFields();
+			while (!parser.EndOfData) {
+				string[] row = parser.ReadFields();
+				this.data.Add(row[0], new Item(row));
+			}
+		}
+
+		private void InputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			this.dataFile = this.InputComboBox.SelectedItem as string;
+			this.SaveSettings();
+			this.ParseData();
+			this.CurrentComboBox.Items.Clear();
+			foreach (var key in this.data.Keys) this.CurrentComboBox.Items.Add(key);
+			this.GetQuestion();
+		}
+
+		private void GetQuestion() {
+			this.questionID = ConfigurationManager.AppSettings["TagPA.QuestionID"] ?? this.questionID;
+			if (this.CurrentComboBox.Items.Count > 0) {
+				this.CurrentComboBox.IsEnabled = true;
+				if (this.questionID == string.Empty) {
+					this.CurrentComboBox.SelectedIndex = 0;
+				} else {
+					var list = this.CurrentComboBox.Items.Cast<string>().Where(Item => Item == this.questionID);
+					if (list.Count() != 1) this.CurrentComboBox.SelectedIndex = -1;
+					else this.CurrentComboBox.SelectedIndex = this.CurrentComboBox.Items.IndexOf(list.First());
+				}
+			} else {
+				this.CurrentComboBox.SelectedIndex = -1;
+				this.CurrentComboBox.IsEnabled = false;
+			}
+		}
+
+		private void PreviousButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex -= 1;
+
+		private void NextButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex += 1;
+
+		private void CurrentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			this.questionID = this.CurrentComboBox.SelectedItem as string;
+			this.SaveSettings();
+
+			this.QuestionFlowDocument.Blocks.Clear();
+			this.AnswerFlowDocument.Blocks.Clear();
+			this.ContextWrapPanel.Children.Clear();
+
+			this.SaveButton.IsEnabled = this.CurrentComboBox.SelectedIndex != -1;
+			if (this.CurrentComboBox.SelectedIndex <= 0) {
+				this.PreviousButton.IsEnabled = false;
+				this.NextButton.IsEnabled = true;
+			} else if (this.CurrentComboBox.SelectedIndex > 0 && this.CurrentComboBox.SelectedIndex < this.CurrentComboBox.Items.Count - 1) {
+				this.PreviousButton.IsEnabled = true;
+				this.NextButton.IsEnabled = true;
+			} else {
+				this.PreviousButton.IsEnabled = true;
+				this.NextButton.IsEnabled = false;
+			}
+
+			this.QuestionFlowDocument.Blocks.Add(new Paragraph(new Run(this.data[this.questionID].Question)));
+			this.AnswerFlowDocument.Blocks.Add(new Paragraph(new Run(this.data[this.questionID].Option[this.data[this.questionID].AnswerID])));
+			foreach (string documentName in this.data[this.questionID].DocumentNames) {
+				string text = File.ReadAllText($"data\\tagqa\\documents\\{documentName}.txt");
+				var documentItem = new DocumentItem() {
+					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
+					Context = text,
+				};
+				documentItem.ContextRichTextBox.Width = 360;
+				this.ContextWrapPanel.Children.Add(documentItem);
+			}
+			this.ContextScrollViewer.ScrollToLeftEnd();
+		}
+		
+		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+
+		}
+
+		private void SaveButton_Click(object sender, RoutedEventArgs e) {
+
+		}
+	}
+}

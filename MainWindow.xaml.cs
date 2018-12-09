@@ -72,6 +72,11 @@ namespace DataLabelingHelper
 				ReAnswer.Closing -= this.OnWindowClosing;
 				ReAnswer.Close();
 			}
+			if (TagPA?.IsInitialized == true) {
+				TagPA.Closing -= this.OnWindowClosing;
+				TagPA.Close();
+			}
+			Application.Current.Shutdown();
 		}
 
 		private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {

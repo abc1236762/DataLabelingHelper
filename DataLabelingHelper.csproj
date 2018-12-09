@@ -37,6 +37,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -60,13 +61,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Mark.cs" />
-    <Compile Include="EditQAWindow.xaml.cs">
+    <Compile Include="DocumentItem.xaml.cs">
+      <DependentUpon>DocumentItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EditQAWindow.xaml.cs">
       <DependentUpon>EditQAWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ReAnswerWindow.xaml.cs">
+    <Compile Include="Windows\ReAnswerWindow.xaml.cs">
       <DependentUpon>ReAnswerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TagPAWindow.xaml.cs">
+    <Compile Include="Windows\TagPAWindow.xaml.cs">
       <DependentUpon>TagPAWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="WindowBlur.cs" />
@@ -74,15 +78,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EditQAWindow.xaml">
+    <Page Include="DocumentItem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ReAnswerWindow.xaml">
+    <Page Include="Windows\EditQAWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MakeQAWindow.xaml">
+    <Page Include="Windows\ReAnswerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\MakeQAWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -93,7 +101,7 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MakeQAWindow.xaml.cs">
+    <Compile Include="Windows\MakeQAWindow.xaml.cs">
       <DependentUpon>MakeQAWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -101,7 +109,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TagPAWindow.xaml">
+    <Page Include="Windows\TagPAWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

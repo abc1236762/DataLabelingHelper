@@ -12,8 +12,6 @@
             <RowDefinition Height="10"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="5"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="5"/>
 			<RowDefinition Height="Auto"/>
@@ -27,10 +25,9 @@
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Label Content="資料標註器" Grid.Column="1" Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="#FFDCDCDC" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <TextBlock Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Text="選擇模式：" />
-        <Button x:Name="MakeQAButton" Content="問題與答案標註模式" Grid.Column="1" Grid.Row="5" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="MakeQAButton_Click"/>
-        <Button x:Name="EditQAButton" Content="問題與答案修改模式" Grid.Column="1" Grid.Row="7" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="EditQAButton_Click"/>
-		<Button x:Name="ReAnswerButton" Content="答案重新標註模式" Grid.Column="1" Grid.Row="9" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="ReAnswerButton_Click"/>
-		<Button x:Name="TagPAButton" Content="文章與答案標記模式" Grid.Column="1" Grid.Row="11" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="TagPAButton_Click"/>
+        <Button x:Name="MakeQAButton" Content="問題與答案標註模式" Grid.Column="1" Grid.Row="3" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="MakeQAButton_Click"/>
+        <Button x:Name="EditQAButton" Content="問題與答案修改模式" Grid.Column="1" Grid.Row="5" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="EditQAButton_Click"/>
+		<Button x:Name="ReAnswerButton" Content="答案重新標註模式" Grid.Column="1" Grid.Row="7" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="ReAnswerButton_Click"/>
+		<Button x:Name="TagPAButton" Content="文章與答案標記模式" Grid.Column="1" Grid.Row="9" Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Click="TagPAButton_Click"/>
 	</Grid>
 </Window>
