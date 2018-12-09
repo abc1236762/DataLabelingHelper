@@ -1,4 +1,4 @@
-﻿<Application x:Class="Wikipedia_Question_Helper.App"
+﻿<Application x:Class="DataLabelingHelper.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">

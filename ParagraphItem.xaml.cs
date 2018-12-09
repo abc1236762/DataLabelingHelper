@@ -4,9 +4,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using static Wikipedia_Question_Helper.MainWindow;
+using static DataLabelingHelper.MainWindow;
 
-namespace Wikipedia_Question_Helper
+namespace DataLabelingHelper
 {
     /// <summary>
     /// ParagraphItem.xaml 的互動邏輯
@@ -16,7 +16,7 @@ namespace Wikipedia_Question_Helper
         public int Line { get; set; }
         public string Context { get; set; }
         public bool IsTagged { get; set; } = false;
-        public ParagraphItem() { InitializeComponent(); }
+        public ParagraphItem() { this.InitializeComponent(); }
 
         private SolidColorBrush BackgroundBrush = Brushes.Transparent;
         private SolidColorBrush TaggedForegroundBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xDC, 0xDC, 0xDC));
@@ -24,41 +24,41 @@ namespace Wikipedia_Question_Helper
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            LineRun.Text = $"{Line:0000}";
+			this.LineRun.Text = $"{this.Line:0000}";
 
             try
-            { ContextFlowDocument.FontSize = double.Parse(MakeQA.FontSizeTextBox.Text); }
+            { this.ContextFlowDocument.FontSize = double.Parse(MakeQA.FontSizeTextBox.Text); }
             catch { }
-            ContextFlowDocument.Blocks.Add(new Paragraph(new Run(Context)));
+			this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
             int WordTotal = 0;
-            ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+			this.ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
                 Inlines.ToList().ForEach(Inline => WordTotal += ((Run)Inline).Text.Length)
             );
-            CountRun.Text = $"{WordTotal}";
+			this.CountRun.Text = $"{WordTotal}";
         }
 
         private void TagButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsTagged)
+            if (!this.IsTagged)
             {
-                TagButton.Content = "已標記";
-                IsTagged = true;
-                ContextFlowDocument.Foreground = TaggedForegroundBrush;
+				this.TagButton.Content = "已標記";
+				this.IsTagged = true;
+				this.ContextFlowDocument.Foreground = this.TaggedForegroundBrush;
             }
             else
             {
-                TagButton.Content = "標記";
-                IsTagged = false;
-                ContextFlowDocument.Foreground = UntaggedForegroundBrush;
+				this.TagButton.Content = "標記";
+				this.IsTagged = false;
+				this.ContextFlowDocument.Foreground = this.UntaggedForegroundBrush;
             }
-            ContextFlowDocument.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+			this.ContextFlowDocument.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
             {
                 Inlines.ToList().ForEach(Inline =>
                 {
-                    if (IsTagged)
-                    { (Inline as Run).Foreground = TaggedForegroundBrush; }
+                    if (this.IsTagged)
+                    { (Inline as Run).Foreground = this.TaggedForegroundBrush; }
                     else
-                    { (Inline as Run).Foreground = UntaggedForegroundBrush; }
+                    { (Inline as Run).Foreground = this.UntaggedForegroundBrush; }
                 });
             });
             MakeQA.CountParagraph();
@@ -66,39 +66,39 @@ namespace Wikipedia_Question_Helper
 
         public void ReplaceParagraph(string FromText,string ToText)
         {
-            Context = Context.Replace(FromText, ToText);
-            ContextFlowDocument.Blocks.Clear();
-            ContextFlowDocument.Blocks.Add(new Paragraph(new Run(Context)));
+			this.Context = this.Context.Replace(FromText, ToText);
+			this.ContextFlowDocument.Blocks.Clear();
+			this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
             int WordTotal = 0;
-            ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+			this.ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
                 Inlines.ToList().ForEach(Inline => WordTotal += ((Run)Inline).Text.Length)
             );
-            CountRun.Text = $"{WordTotal}";
+			this.CountRun.Text = $"{WordTotal}";
         }
 
 
         private void ContextRichTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (ContextRichTextBox.IsFocused)
+            if (this.ContextRichTextBox.IsFocused)
             {
                 int WordTotal = 0;
-                ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+				this.ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
                     Inlines.ToList().ForEach(Inline => WordTotal += ((Run)Inline).Text.Length)
                 );
-                CountRun.Text = $"{WordTotal}";
-                ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+				this.CountRun.Text = $"{WordTotal}";
+				this.ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
                 {
                     Inlines.ToList().ForEach(Inline =>
                     {
-                        (Inline as Run).FontSize = ContextFlowDocument.FontSize;
-                        (Inline as Run).Background = BackgroundBrush;
-                        if (IsTagged)
+                        (Inline as Run).FontSize = this.ContextFlowDocument.FontSize;
+                        (Inline as Run).Background = this.BackgroundBrush;
+                        if (this.IsTagged)
                         {
-                            (Inline as Run).Foreground = TaggedForegroundBrush;
+                            (Inline as Run).Foreground = this.TaggedForegroundBrush;
                             MakeQA.CountParagraph();
                         }
                         else
-                        { (Inline as Run).Foreground = UntaggedForegroundBrush; }
+                        { (Inline as Run).Foreground = this.UntaggedForegroundBrush; }
                     });
                 });
             }
@@ -107,15 +107,15 @@ namespace Wikipedia_Question_Helper
         private void ContextRichTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
 
-            Context = string.Empty;
-            ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
+			this.Context = string.Empty;
+			this.ContextFlowDocument?.Blocks.Select(Block => (Block as Paragraph).Inlines).ToList().ForEach(Inlines =>
             {
-                Inlines.ToList().ForEach(Inline => Context += (Inline as Run).Text);
-                Context += Environment.NewLine;
+                Inlines.ToList().ForEach(Inline => this.Context += (Inline as Run).Text);
+				this.Context += Environment.NewLine;
             });
-            Context = Context.TrimEnd(Environment.NewLine.ToCharArray());
-            ContextFlowDocument?.Blocks.Clear();
-            ContextFlowDocument.Blocks.Add(new Paragraph(new Run(Context)));
+			this.Context = this.Context.TrimEnd(Environment.NewLine.ToCharArray());
+			this.ContextFlowDocument?.Blocks.Clear();
+			this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
         }
     }
 }

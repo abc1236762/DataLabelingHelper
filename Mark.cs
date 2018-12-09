@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace Wikipedia_Question_Helper
+namespace DataLabelingHelper
 {
     public static class Mark
     {

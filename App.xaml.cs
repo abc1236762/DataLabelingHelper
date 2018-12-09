@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace Wikipedia_Question_Helper
+namespace DataLabelingHelper
 {
     /// <summary>
     /// App.xaml 的互動邏輯

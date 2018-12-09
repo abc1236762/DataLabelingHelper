@@ -1,85 +1,83 @@
-﻿using System.Net.Http;
-using System.Windows;
+﻿using System.Windows;
 
-namespace Wikipedia_Question_Helper
+namespace DataLabelingHelper
 {
-    /// <summary>
-    /// MainWindow.xaml 的互動邏輯
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        public static MainWindow Main;
-        public static MakeQAWindow MakeQA;
-        public static EditQAWindow EditQA;
-        public static ReAnswerWindow ReAnswer;
+	/// <summary>
+	/// MainWindow.xaml 的互動邏輯
+	/// </summary>
+	public partial class MainWindow : Window
+	{
+		public static MainWindow Main;
+		public static MakeQAWindow MakeQA;
+		public static EditQAWindow EditQA;
+		public static ReAnswerWindow ReAnswer;
+		public static TagPAWindow TagPA;
 
-        public MainWindow()
-        {
-            InitializeComponent();
-            WindowBlur.WindowBlur.Enable(this);
-            Main = this;
-        }
-        
-        private void MakeQAButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (MakeQA == null)
-            {
-                MakeQA = new MakeQAWindow();
-                MakeQA.Closing += OnWindowClosing;
-                WindowBlur.WindowBlur.Enable(MakeQA);
-            }
-            MakeQA.Show();
-            Hide();
-        }
+		public MainWindow() {
+			this.InitializeComponent();
+			WindowBlur.WindowBlur.Enable(this);
+			Main = this;
+		}
 
-        private void EditQAButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (EditQA == null)
-            {
-                EditQA = new EditQAWindow();
-                EditQA.Closing += OnWindowClosing;
-                WindowBlur.WindowBlur.Enable(EditQA);
-            }
-            EditQA.Show();
-            Hide();
-        }
+		private void MakeQAButton_Click(object sender, RoutedEventArgs e) {
+			if (MakeQA is null) {
+				MakeQA = new MakeQAWindow();
+				MakeQA.Closing += this.OnWindowClosing;
+				WindowBlur.WindowBlur.Enable(MakeQA);
+			}
+			MakeQA.Show();
+			this.Hide();
+		}
 
-        private void ReAnswerButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ReAnswer == null)
-            {
-                ReAnswer = new ReAnswerWindow();
-                ReAnswer.Closing += OnWindowClosing;
-                WindowBlur.WindowBlur.Enable(ReAnswer);
-            }
-            ReAnswer.Show();
-            Hide();
-        }
+		private void EditQAButton_Click(object sender, RoutedEventArgs e) {
+			if (EditQA is null) {
+				EditQA = new EditQAWindow();
+				EditQA.Closing += this.OnWindowClosing;
+				WindowBlur.WindowBlur.Enable(EditQA);
+			}
+			EditQA.Show();
+			this.Hide();
+		}
 
-        private void Window_Closing(object sender, System.EventArgs e)
-        {
-            if (MakeQA?.IsInitialized == true)
-            {
-                MakeQA.Closing -= OnWindowClosing;
-                MakeQA.Close();
-            }
-            if (EditQA?.IsInitialized == true)
-            {
-                EditQA.Closing -= OnWindowClosing;
-                EditQA.Close();
-            }
-            if (ReAnswer?.IsInitialized == true)
-            {
-                ReAnswer.Closing -= OnWindowClosing;
-                ReAnswer.Close();
-            }
-        }
+		private void ReAnswerButton_Click(object sender, RoutedEventArgs e) {
+			if (ReAnswer is null) {
+				ReAnswer = new ReAnswerWindow();
+				ReAnswer.Closing += this.OnWindowClosing;
+				WindowBlur.WindowBlur.Enable(ReAnswer);
+			}
+			ReAnswer.Show();
+			this.Hide();
+		}
 
-        private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = true;
-            ((Window)sender).Hide();
-            Main.Show();
-        }
-    }
+		private void TagPAButton_Click(object sender, RoutedEventArgs e) {
+			if (TagPA is null) {
+				TagPA = new TagPAWindow();
+				TagPA.Closing += this.OnWindowClosing;
+				WindowBlur.WindowBlur.Enable(TagPA);
+			}
+			TagPA.Show();
+			this.Hide();
+		}
+
+		private void Window_Closing(object sender, System.EventArgs e) {
+			if (MakeQA?.IsInitialized == true) {
+				MakeQA.Closing -= this.OnWindowClosing;
+				MakeQA.Close();
+			}
+			if (EditQA?.IsInitialized == true) {
+				EditQA.Closing -= this.OnWindowClosing;
+				EditQA.Close();
+			}
+			if (ReAnswer?.IsInitialized == true) {
+				ReAnswer.Closing -= this.OnWindowClosing;
+				ReAnswer.Close();
+			}
+		}
+
+		private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
+			e.Cancel = true;
+			((Window)sender).Hide();
+			Main.Show();
+		}
+	}
 }

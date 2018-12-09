@@ -9,9 +9,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using static Wikipedia_Question_Helper.Mark;
+using static DataLabelingHelper.Mark;
 
-namespace Wikipedia_Question_Helper
+namespace DataLabelingHelper
 {
     /// <summary>
     /// MainWindow.xaml 的互動邏輯
@@ -27,26 +27,26 @@ namespace Wikipedia_Question_Helper
 
         public ReAnswerWindow()
         {
-            InitializeComponent();
-            for (int i = 1; i <= 5; i++) InputMethod.SetIsInputMethodEnabled((TextBox)FindName($"Answer{i}NumberTextBox"), false);
+			this.InitializeComponent();
+            for (int i = 1; i <= 5; i++) InputMethod.SetIsInputMethodEnabled((TextBox)this.FindName($"Answer{i}NumberTextBox"), false);
 
             if (Directory.Exists("data\\reanswer\\"))
             {
-                InputComboBox.Items.Clear();
+				this.InputComboBox.Items.Clear();
                 Directory.GetDirectories("data\\reanswer\\").ToList().ForEach(DirectoryPath =>
                 {
                     string PathName = Path.GetFileName(DirectoryPath);
-                    InputList.Add(PathName, new List<string>());
+					this.InputList.Add(PathName, new List<string>());
                     Directory.GetFiles(Path.Combine(DirectoryPath, "paragraph\\")).ToList().ForEach(FilePath =>
-                        InputList[PathName].Add(Path.GetFileNameWithoutExtension(FilePath)));
-                    InputComboBox.Items.Add(PathName);
+						this.InputList[PathName].Add(Path.GetFileNameWithoutExtension(FilePath)));
+					this.InputComboBox.Items.Add(PathName);
                 });
 
                 try
                 {
-                    BeginFolder = ConfigurationManager.AppSettings["ReAnswer.BeginFolder"] ?? BeginFolder;
-                    InputComboBox.SelectedIndex = InputComboBox.Items.IndexOf(
-                        InputComboBox.Items.Cast<string>().Where(Item => Item == BeginFolder).First());
+					this.BeginFolder = ConfigurationManager.AppSettings["ReAnswer.BeginFolder"] ?? this.BeginFolder;
+					this.InputComboBox.SelectedIndex = this.InputComboBox.Items.IndexOf(
+						this.InputComboBox.Items.Cast<string>().Where(Item => Item == this.BeginFolder).First());
                 }
                 catch { MessageBox.Show("取得進度錯誤。"); }
 
@@ -55,20 +55,20 @@ namespace Wikipedia_Question_Helper
 
         private void InputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ContextFlowDocument.Blocks.Clear();
-            CurrentComboBox.Items.Clear();
-            Context = string.Empty;
-            InputList[(string)InputComboBox.SelectedItem].ForEach(Item => CurrentComboBox.Items.Add(Item));
-            CurrentComboBox.IsEnabled = true;
-            if (CurrentComboBox.Items.Count > 0) NextButton.IsEnabled = true;
+			this.ContextFlowDocument.Blocks.Clear();
+			this.CurrentComboBox.Items.Clear();
+			this.Context = string.Empty;
+			this.InputList[(string)this.InputComboBox.SelectedItem].ForEach(Item => this.CurrentComboBox.Items.Add(Item));
+			this.CurrentComboBox.IsEnabled = true;
+            if (this.CurrentComboBox.Items.Count > 0) this.NextButton.IsEnabled = true;
             try
             {
-                BeginPage = ConfigurationManager.AppSettings["ReAnswer.BeginPage"] ?? BeginPage;
-                if (BeginPage.Length == 0) CurrentComboBox.SelectedIndex = -1;
+				this.BeginPage = ConfigurationManager.AppSettings["ReAnswer.BeginPage"] ?? this.BeginPage;
+                if (this.BeginPage.Length == 0) this.CurrentComboBox.SelectedIndex = -1;
                 else
                 {
-                    CurrentComboBox.SelectedIndex = CurrentComboBox.Items.IndexOf(
-                       CurrentComboBox.Items.Cast<string>().Where(Item => Item == BeginPage).First());
+					this.CurrentComboBox.SelectedIndex = this.CurrentComboBox.Items.IndexOf(
+					   this.CurrentComboBox.Items.Cast<string>().Where(Item => Item == this.BeginPage).First());
                 }
             }
             catch { }
@@ -76,64 +76,64 @@ namespace Wikipedia_Question_Helper
 
         private void CurrentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Context = string.Empty;
-            ContextFlowDocument.Blocks.Clear();
-            ProblemListBox.SelectedItems.Clear();
+			this.Context = string.Empty;
+			this.ContextFlowDocument.Blocks.Clear();
+			this.ProblemListBox.SelectedItems.Clear();
             for (int i = 1; i <= 5; i++)
             {
-                (FindName($"Question{i}TextBox") as TextBox).Text = string.Empty;
-                (FindName($"Answer{i}TextBox") as TextBox).Text = string.Empty;
-                (FindName($"Answer{i}NumberTextBox") as TextBox).Text = "0";
-                (FindName($"Answer{i}NumberTextBox") as TextBox).IsEnabled = false;
-                (FindName($"Answer{i}NumberButton") as Button).Content = "取\n消";
-                (FindName($"Answer{i}NumberButton") as Button).IsEnabled = false;
+                (this.FindName($"Question{i}TextBox") as TextBox).Text = string.Empty;
+                (this.FindName($"Answer{i}TextBox") as TextBox).Text = string.Empty;
+                (this.FindName($"Answer{i}NumberTextBox") as TextBox).Text = "0";
+                (this.FindName($"Answer{i}NumberTextBox") as TextBox).IsEnabled = false;
+                (this.FindName($"Answer{i}NumberButton") as Button).Content = "取\n消";
+                (this.FindName($"Answer{i}NumberButton") as Button).IsEnabled = false;
             }
-            ProblemListBox.Items.Cast<ListBoxItem>().ToList().ForEach(Item => Item.Content = string.Empty);
-            WordTotalRun.Text = "0";
-            SaveButton.IsEnabled = CurrentComboBox.SelectedIndex != -1;
-            if (CurrentComboBox.SelectedIndex <= 0)
+			this.ProblemListBox.Items.Cast<ListBoxItem>().ToList().ForEach(Item => Item.Content = string.Empty);
+			this.WordTotalRun.Text = "0";
+			this.SaveButton.IsEnabled = this.CurrentComboBox.SelectedIndex != -1;
+            if (this.CurrentComboBox.SelectedIndex <= 0)
             {
-                PreviousButton.IsEnabled = false;
-                NextButton.IsEnabled = true;
+				this.PreviousButton.IsEnabled = false;
+				this.NextButton.IsEnabled = true;
             }
-            else if (CurrentComboBox.SelectedIndex > 0 && CurrentComboBox.SelectedIndex < CurrentComboBox.Items.Count - 1)
+            else if (this.CurrentComboBox.SelectedIndex > 0 && this.CurrentComboBox.SelectedIndex < this.CurrentComboBox.Items.Count - 1)
             {
-                PreviousButton.IsEnabled = true;
-                NextButton.IsEnabled = true;
+				this.PreviousButton.IsEnabled = true;
+				this.NextButton.IsEnabled = true;
             }
             else
             {
-                PreviousButton.IsEnabled = true;
-                NextButton.IsEnabled = false;
+				this.PreviousButton.IsEnabled = true;
+				this.NextButton.IsEnabled = false;
             }
-            if (CurrentComboBox.SelectedIndex >= 0)
+            if (this.CurrentComboBox.SelectedIndex >= 0)
             {
-                Context = File.ReadAllText("data\\reanswer\\" + (string)InputComboBox.SelectedItem +
-                    "\\paragraph\\" + (string)CurrentComboBox.SelectedItem + ".txt");
+				this.Context = File.ReadAllText("data\\reanswer\\" + (string)this.InputComboBox.SelectedItem +
+                    "\\paragraph\\" + (string)this.CurrentComboBox.SelectedItem + ".txt");
                 try
                 {
 
-                    ContextFlowDocument.Blocks.Add(new Paragraph(new Run(Context)));
+					this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
                     try
-                    { ContextFlowDocument.FontSize = double.Parse(FontSizeTextBox.Text); }
+                    { this.ContextFlowDocument.FontSize = double.Parse(this.FontSizeTextBox.Text); }
                     catch { }
-                    if (Context.IndexOf(' ') >= 0)
+                    if (this.Context.IndexOf(' ') >= 0)
                     {
-                        ProblemListBox.SelectedItems.Add(ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有空格").First());
-                        ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有空格").First().Content
-                            = $"第{string.Join(",", Enumerable.Range(0, Context.Length).Where(i => Context[i] == ' '))}個字元";
+						this.ProblemListBox.SelectedItems.Add(this.ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有空格").First());
+						this.ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有空格").First().Content
+                            = $"第{string.Join(",", Enumerable.Range(0, this.Context.Length).Where(i => this.Context[i] == ' '))}個字元";
                     }
-                    if (Context.IndexOfAny(new char[] { '(', ')', '[', ']', '（', '）', '［', '］' }) >= 0)
+                    if (this.Context.IndexOfAny(new char[] { '(', ')', '[', ']', '（', '）', '［', '］' }) >= 0)
                     {
-                        ProblemListBox.SelectedItems.Add(ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有小／中括號").First());
-                        ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有小／中括號").First().Content
-                            = $"第{string.Join(",", Enumerable.Range(0, Context.Length).Where(i => "()[]（）［］".IndexOf(Context[i]) >= 0))}個字元";
+						this.ProblemListBox.SelectedItems.Add(this.ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有小／中括號").First());
+						this.ProblemListBox.Items.Cast<ListBoxItem>().Where(Item => (string)Item.Tag == "文中有小／中括號").First().Content
+                            = $"第{string.Join(",", Enumerable.Range(0, this.Context.Length).Where(i => "()[]（）［］".IndexOf(this.Context[i]) >= 0))}個字元";
                     }
 
-                    WordTotalRun.Text = $"{Context.Length}";
-                    string[] Question = File.ReadAllText("data\\reanswer\\" + (string)InputComboBox.SelectedItem +
-                        "\\question\\" + (string)CurrentComboBox.SelectedItem + "_QA.txt").Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < Question.Length; i++) ((TextBox)FindName($"Question{i + 1}TextBox")).Text = Question[i];
+					this.WordTotalRun.Text = $"{this.Context.Length}";
+                    string[] Question = File.ReadAllText("data\\reanswer\\" + (string)this.InputComboBox.SelectedItem +
+                        "\\question\\" + (string)this.CurrentComboBox.SelectedItem + "_QA.txt").Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < Question.Length; i++) ((TextBox)this.FindName($"Question{i + 1}TextBox")).Text = Question[i];
 
                 }
                 catch (Exception Exception) { MessageBox.Show(Exception.Message); }
@@ -143,11 +143,11 @@ namespace Wikipedia_Question_Helper
             {
                 var ConfigFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var Settings = ConfigFile.AppSettings.Settings;
-                if (Settings["ReAnswer.BeginFolder"] == null) { Settings.Add("ReAnswer.BeginFolder", (string)InputComboBox.SelectedItem); }
-                else { Settings["ReAnswer.BeginFolder"].Value = (string)InputComboBox.SelectedItem; }
-                BeginPage = CurrentComboBox.SelectedItem == null ? "" : (string)CurrentComboBox.SelectedItem;
-                if (Settings["ReAnswer.BeginPage"] == null) { Settings.Add("ReAnswer.BeginPage", BeginPage); }
-                else { Settings["ReAnswer.BeginPage"].Value = BeginPage; }
+                if (Settings["ReAnswer.BeginFolder"] == null) { Settings.Add("ReAnswer.BeginFolder", (string)this.InputComboBox.SelectedItem); }
+                else { Settings["ReAnswer.BeginFolder"].Value = (string)this.InputComboBox.SelectedItem; }
+				this.BeginPage = this.CurrentComboBox.SelectedItem == null ? "" : (string)this.CurrentComboBox.SelectedItem;
+                if (Settings["ReAnswer.BeginPage"] == null) { Settings.Add("ReAnswer.BeginPage", this.BeginPage); }
+                else { Settings["ReAnswer.BeginPage"].Value = this.BeginPage; }
                 ConfigFile.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection(ConfigFile.AppSettings.SectionInformation.Name);
             }
@@ -155,17 +155,17 @@ namespace Wikipedia_Question_Helper
 
         }
 
-        private void PreviousButton_Click(object sender, RoutedEventArgs e) => CurrentComboBox.SelectedIndex -= 1;
+        private void PreviousButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex -= 1;
 
-        private void NextButton_Click(object sender, RoutedEventArgs e) => CurrentComboBox.SelectedIndex += 1;
+        private void NextButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex += 1;
 
 
         private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (double.TryParse(FontSizeTextBox.Text, out double FontSize))
+            if (double.TryParse(this.FontSizeTextBox.Text, out double FontSize))
             {
-                ProblemListBox?.Items.Cast<ListBoxItem>().ToList().ForEach(Item => Item.FontSize = FontSize * 3 / 4);
-                for (int i = 1; i <= 5; i++) ((Button)FindName($"Answer{i}NumberButton"))?.SetValue(FontSizeProperty, FontSize / 2);
+				this.ProblemListBox?.Items.Cast<ListBoxItem>().ToList().ForEach(Item => Item.FontSize = FontSize * 3 / 4);
+                for (int i = 1; i <= 5; i++) ((Button)this.FindName($"Answer{i}NumberButton"))?.SetValue(FontSizeProperty, FontSize / 2);
             }
         }
 
@@ -174,8 +174,8 @@ namespace Wikipedia_Question_Helper
         {
             string SelectedText = ((TextBox)sender).SelectedText;
             int SelectedTextNumber = 0;
-            if (((TextBox)sender).SelectedText.Length == 0) UnmarkAnswer(ContextFlowDocument, Context);
-            else MarkAnswer(ContextFlowDocument, Context, SelectedText, ref SelectedTextNumber);
+            if (((TextBox)sender).SelectedText.Length == 0) UnmarkAnswer(this.ContextFlowDocument, this.Context);
+            else MarkAnswer(this.ContextFlowDocument, this.Context, SelectedText, ref SelectedTextNumber);
         }
 
         private void AnswerTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -184,42 +184,42 @@ namespace Wikipedia_Question_Helper
             int i = 1;
             for (i = 1; i <= 5; i++)
             {
-                if (((TextBox)FindName($"Answer{i}TextBox")).IsFocused || ((TextBox)FindName($"Answer{i}NumberTextBox")).IsFocused)
+                if (((TextBox)this.FindName($"Answer{i}TextBox")).IsFocused || ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsFocused)
                 {
                     Answer = ((TextBox)sender).Text;
                     if (Answer.Length == 0)
                     {
-                        UnmarkAnswer(ContextFlowDocument, Context);
-                        ((TextBox)FindName($"Answer{i}NumberTextBox")).Text = "0";
-                        ((TextBox)FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
-                        ((Button)FindName($"Answer{i}NumberButton")).Content = "取\n消";
-                        ((Button)FindName($"Answer{i}NumberButton")).IsEnabled = false;
+                        UnmarkAnswer(this.ContextFlowDocument, this.Context);
+                        ((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text = "0";
+                        ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
+                        ((Button)this.FindName($"Answer{i}NumberButton")).Content = "取\n消";
+                        ((Button)this.FindName($"Answer{i}NumberButton")).IsEnabled = false;
                     }
                     else
                     {
                         int AnswerNumber = 0;
-                        MarkAnswer(ContextFlowDocument, Context, Answer, ref AnswerNumber);
+                        MarkAnswer(this.ContextFlowDocument, this.Context, Answer, ref AnswerNumber);
                         if (AnswerNumber > 1)
                         {
-                            if (((TextBox)FindName($"Answer{i}NumberTextBox")).Text == "0")
-                                ((TextBox)FindName($"Answer{i}NumberTextBox")).Text = "1";
-                            ((TextBox)FindName($"Answer{i}NumberTextBox")).IsEnabled = true;
-                            ((Button)FindName($"Answer{i}NumberButton")).Content = "確\n定";
-                            ((Button)FindName($"Answer{i}NumberButton")).IsEnabled = true;
+                            if (((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text == "0")
+                                ((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text = "1";
+                            ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsEnabled = true;
+                            ((Button)this.FindName($"Answer{i}NumberButton")).Content = "確\n定";
+                            ((Button)this.FindName($"Answer{i}NumberButton")).IsEnabled = true;
                         }
                         else if (AnswerNumber == 1)
                         {
-                            ((TextBox)FindName($"Answer{i}NumberTextBox")).Text = "1";
-                            ((TextBox)FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
-                            ((Button)FindName($"Answer{i}NumberButton")).Content = "取\n消";
-                            ((Button)FindName($"Answer{i}NumberButton")).IsEnabled = false;
+                            ((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text = "1";
+                            ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
+                            ((Button)this.FindName($"Answer{i}NumberButton")).Content = "取\n消";
+                            ((Button)this.FindName($"Answer{i}NumberButton")).IsEnabled = false;
                         }
                         else
                         {
-                            ((TextBox)FindName($"Answer{i}NumberTextBox")).Text = "0";
-                            ((TextBox)FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
-                            ((Button)FindName($"Answer{i}NumberButton")).Content = "取\n消";
-                            ((Button)FindName($"Answer{i}NumberButton")).IsEnabled = false;
+                            ((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text = "0";
+                            ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsEnabled = false;
+                            ((Button)this.FindName($"Answer{i}NumberButton")).Content = "取\n消";
+                            ((Button)this.FindName($"Answer{i}NumberButton")).IsEnabled = false;
                         }
                     }
                     break;
@@ -234,15 +234,15 @@ namespace Wikipedia_Question_Helper
         {
             for (int i = 1; i <= 5; i++)
             {
-                if (((TextBox)FindName($"Answer{i}NumberTextBox"))?.IsFocused == true)
-                { ((Button)FindName($"Answer{i}NumberButton")).Content = "取\n消"; break; }
+                if (((TextBox)this.FindName($"Answer{i}NumberTextBox"))?.IsFocused == true)
+                { ((Button)this.FindName($"Answer{i}NumberButton")).Content = "取\n消"; break; }
             }
         }
 
         private void AnswerTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ((TextBox)sender).SelectionLength = 0;
-            UnmarkAnswer(ContextFlowDocument, Context);
+            UnmarkAnswer(this.ContextFlowDocument, this.Context);
         }
 
         private void AnswerTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -251,13 +251,13 @@ namespace Wikipedia_Question_Helper
             int i = 1;
             for (i = 1; i <= 5; i++)
             {
-                if (((TextBox)FindName($"Answer{i}TextBox")).IsFocused || ((TextBox)FindName($"Answer{i}NumberTextBox")).IsFocused)
+                if (((TextBox)this.FindName($"Answer{i}TextBox")).IsFocused || ((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsFocused)
                 {
                     Answer = ((TextBox)sender).Text;
                     if (Answer.Length > 0)
                     {
                         int AnswerNumber = 0;
-                        MarkAnswer(ContextFlowDocument, Context, Answer, ref AnswerNumber);
+                        MarkAnswer(this.ContextFlowDocument, this.Context, Answer, ref AnswerNumber);
                     }
                     break;
                 }
@@ -267,12 +267,12 @@ namespace Wikipedia_Question_Helper
         private void AnswerNumberTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             for (int i = 1; i <= 5; i++)
-                if (((TextBox)FindName($"Answer{i}NumberTextBox")).IsFocused)
+                if (((TextBox)this.FindName($"Answer{i}NumberTextBox")).IsFocused)
                 {
                     int AnswerNumber = 0;
-                    MarkAnswer(ContextFlowDocument, Context, ((TextBox)FindName($"Answer{i}TextBox")).Text, ref AnswerNumber);
+                    MarkAnswer(this.ContextFlowDocument, this.Context, ((TextBox)this.FindName($"Answer{i}TextBox")).Text, ref AnswerNumber);
 
-                    ((TextBox)FindName($"Answer{i}NumberTextBox")).SelectAll();
+                    ((TextBox)this.FindName($"Answer{i}NumberTextBox")).SelectAll();
                     break;
                 }
         }
@@ -283,11 +283,11 @@ namespace Wikipedia_Question_Helper
             int AnswerCount = 0;
             for (int i = 1; i <= 5; i++)
             {
-                if ((string)((Button)FindName($"Answer{i}NumberButton")).Content == "確\n定")
+                if ((string)((Button)this.FindName($"Answer{i}NumberButton")).Content == "確\n定")
                 { MessageBox.Show($"答案{i}未確定。"); return; }
-                int.TryParse(((TextBox)FindName($"Answer{i}NumberTextBox")).Text, out int AnswerNumber);
-                if (!CheckAnswer(Context, ((TextBox)FindName($"Question{i}TextBox")).Text,
-                    ((TextBox)FindName($"Answer{i}TextBox")).Text, AnswerNumber, i, ref Answers, ref AnswerCount)) return;
+                int.TryParse(((TextBox)this.FindName($"Answer{i}NumberTextBox")).Text, out int AnswerNumber);
+                if (!CheckAnswer(this.Context, ((TextBox)this.FindName($"Question{i}TextBox")).Text,
+                    ((TextBox)this.FindName($"Answer{i}TextBox")).Text, AnswerNumber, i, ref Answers, ref AnswerCount)) return;
             }
             if (AnswerCount < 3) { MessageBox.Show("答案數量不足。"); return; }
             Answers = Answers.Replace("甚麼", "什麼");
@@ -315,18 +315,18 @@ namespace Wikipedia_Question_Helper
                 { if (MessageBox.Show("按確定重試", "資料夾更名失敗", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel) return; }
             }
 
-            File.Copy("data\\reanswer\\" + (string)InputComboBox.SelectedItem +
-                "\\paragraph\\" + (string)CurrentComboBox.SelectedItem + ".txt",
-                Path.Combine(DirectoryName, $"paragraph\\{(string)CurrentComboBox.SelectedItem}.txt"), true);
-            using (var StreamWriter = new StreamWriter(Path.Combine(DirectoryName, $"question\\{(string)CurrentComboBox.SelectedItem}_QA.txt"), false, new UTF8Encoding(false)))
+            File.Copy("data\\reanswer\\" + (string)this.InputComboBox.SelectedItem +
+                "\\paragraph\\" + (string)this.CurrentComboBox.SelectedItem + ".txt",
+                Path.Combine(DirectoryName, $"paragraph\\{(string)this.CurrentComboBox.SelectedItem}.txt"), true);
+            using (var StreamWriter = new StreamWriter(Path.Combine(DirectoryName, $"question\\{(string)this.CurrentComboBox.SelectedItem}_QA.txt"), false, new UTF8Encoding(false)))
             { StreamWriter.Write(Answers.TrimEnd(Environment.NewLine.ToCharArray())); }
             using (var StreamWriter = new StreamWriter(Path.Combine(DirectoryName, "資料問題.txt"), true, new UTF8Encoding(false)))
             {
-                if (ProblemListBox.SelectedIndex >= 0)
+                if (this.ProblemListBox.SelectedIndex >= 0)
                 {
                     string Probrem = string.Empty;
-                    Probrem = $"{(string)CurrentComboBox.SelectedItem} 有下列問題：\n";
-                    ProblemListBox.Items.Cast<ListBoxItem>().ToList().ForEach(Item =>
+                    Probrem = $"{(string)this.CurrentComboBox.SelectedItem} 有下列問題：\n";
+					this.ProblemListBox.Items.Cast<ListBoxItem>().ToList().ForEach(Item =>
                     {
                         if (!Item.IsSelected && Item.Content?.ToString().Length > 0)
                         { if (MessageBox.Show("按確定選擇", "問題有填但未選擇", MessageBoxButton.OKCancel) == MessageBoxResult.OK) Item.IsSelected = true; }
@@ -341,7 +341,7 @@ namespace Wikipedia_Question_Helper
                     StreamWriter.Write(Probrem);
                 }
             }
-            CurrentComboBox.SelectedIndex = CurrentComboBox.SelectedIndex < CurrentComboBox.Items.Count - 1 ? CurrentComboBox.SelectedIndex + 1 : -1;
+			this.CurrentComboBox.SelectedIndex = this.CurrentComboBox.SelectedIndex < this.CurrentComboBox.Items.Count - 1 ? this.CurrentComboBox.SelectedIndex + 1 : -1;
         }
 
         void MoveToNextUIElement(KeyEventArgs e)
@@ -353,7 +353,7 @@ namespace Wikipedia_Question_Helper
 
         private void QuestionAndAnswerTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && (sender as TextBox).AcceptsReturn == false) MoveToNextUIElement(e);
+            if (e.Key == Key.Enter && (sender as TextBox).AcceptsReturn == false) this.MoveToNextUIElement(e);
             if (e.Key == Key.Up) (sender as TextBox).CaretIndex = 0;
             if (e.Key == Key.Down) (sender as TextBox).CaretIndex = (sender as TextBox).Text.Length;
         }
