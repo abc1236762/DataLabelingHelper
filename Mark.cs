@@ -57,17 +57,21 @@ namespace DataLabelingHelper
                     {
                         Run.Foreground = AnswerForegroundBrush;
                         Run.Background = AnswerBackgroundBrush;
-                        TextBlock Inline = new TextBlock()
-                        {
-                            Text = (++AnswerNumberNow).ToString(),
-                            Foreground = TaggedForegroundBrush,
-                            Background = InlineBackgroundBrush,
-                            FontSize = ContextFlowDocument.FontSize / 1.5
-                        };
-                        Inline.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
-                        Inline.Arrange(new Rect(Inline.DesiredSize));
-                        Inline.Margin = new Thickness(Inline.ActualWidth * -1D, 0, 0, 0);
-                        ContextParagraph.Inlines.Add(Inline);
+						if (AnswerNumberNow > 0) {
+							TextBlock Inline = new TextBlock()
+							{
+								Text = (++AnswerNumberNow).ToString(),
+								Foreground = TaggedForegroundBrush,
+								Background = InlineBackgroundBrush,
+								FontSize = ContextFlowDocument.FontSize / 1.5
+							};
+							Inline.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+							Inline.Arrange(new Rect(Inline.DesiredSize));
+							Inline.Margin = new Thickness(Inline.ActualWidth * -1D, 0, 0, 0);
+							ContextParagraph.Inlines.Add(Inline);
+						}
+
+						
                     }
                 });
                 ContextFlowDocument.Blocks.Add(ContextParagraph);

@@ -1,12 +1,11 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
 using Microsoft.VisualBasic.FileIO;
-using System;
-using System.Windows.Documents;
 
 namespace DataLabelingHelper
 {
@@ -15,9 +14,6 @@ namespace DataLabelingHelper
 	/// </summary>
 	public partial class TagPAWindow : Window
 	{
-		private string dataFile;
-		private string questionID;
-
 		private struct Item
 		{
 			public readonly string Question;
@@ -37,14 +33,18 @@ namespace DataLabelingHelper
 			}
 		}
 
+		private string dataFile;
+		private string questionID;
 		private Dictionary<string, Item> data;
+		private DocumentItem focusedDocumentItem = null;
+		private string selectedText = string.Empty;
 
 		public TagPAWindow() {
 			this.InitializeComponent();
 
-			if (Directory.Exists("data\\tagqa\\")) {
+			if (Directory.Exists("data\\tagpa\\")) {
 				this.InputComboBox.Items.Clear();
-				Directory.GetFiles("data\\tagqa\\", "*.csv").ToList().ForEach(filePath => {
+				Directory.GetFiles("data\\tagpa\\", "*.csv").ToList().ForEach(filePath => {
 					this.InputComboBox.Items.Add(Path.GetFileNameWithoutExtension(filePath));
 				});
 				this.GetSelectedFile();
@@ -64,6 +64,7 @@ namespace DataLabelingHelper
 		private void GetSelectedFile() {
 			this.dataFile = ConfigurationManager.AppSettings["TagPA.DataFile"] ?? this.dataFile;
 			if (this.InputComboBox.Items.Count > 0) {
+				this.InputComboBox.IsEnabled = true;
 				if (this.dataFile == string.Empty) {
 					this.InputComboBox.SelectedIndex = 0;
 				} else {
@@ -71,11 +72,14 @@ namespace DataLabelingHelper
 					if (list.Count() != 1) this.InputComboBox.SelectedIndex = -1;
 					else this.InputComboBox.SelectedIndex = this.InputComboBox.Items.IndexOf(list.First());
 				}
-			} else this.InputComboBox.SelectedIndex = -1;
+			} else {
+				this.InputComboBox.IsEnabled = false;
+				this.InputComboBox.SelectedIndex = -1;
+			}
 		}
 
 		private void ParseData() {
-			string filePath = $"data\\tagqa\\{this.InputComboBox.SelectedItem as string}.csv";
+			string filePath = $"data\\tagpa\\{this.InputComboBox.SelectedItem as string}.csv";
 			TextFieldParser parser = new TextFieldParser(filePath) {
 				TextFieldType = FieldType.Delimited,
 			};
@@ -115,19 +119,22 @@ namespace DataLabelingHelper
 			}
 		}
 
-		private void PreviousButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex -= 1;
+		private void PreviousButton_Click(object sender, RoutedEventArgs e) =>
+			this.CurrentComboBox.SelectedIndex -= 1;
 
-		private void NextButton_Click(object sender, RoutedEventArgs e) => this.CurrentComboBox.SelectedIndex += 1;
+		private void NextButton_Click(object sender, RoutedEventArgs e) =>
+			this.CurrentComboBox.SelectedIndex += 1;
 
 		private void CurrentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
 			this.questionID = this.CurrentComboBox.SelectedItem as string;
 			this.SaveSettings();
 
-			this.QuestionFlowDocument.Blocks.Clear();
-			this.AnswerFlowDocument.Blocks.Clear();
+			this.QuestionTextBox.Text = string.Empty;
+			this.AnswerTextBox.Text = string.Empty;
 			this.ContextWrapPanel.Children.Clear();
 
-			this.SaveButton.IsEnabled = this.CurrentComboBox.SelectedIndex != -1;
+			this.AbortButton.IsEnabled = this.SaveButton.IsEnabled =
+				this.CurrentComboBox.SelectedIndex != -1;
 			if (this.CurrentComboBox.SelectedIndex <= 0) {
 				this.PreviousButton.IsEnabled = false;
 				this.NextButton.IsEnabled = true;
@@ -139,25 +146,68 @@ namespace DataLabelingHelper
 				this.NextButton.IsEnabled = false;
 			}
 
-			this.QuestionFlowDocument.Blocks.Add(new Paragraph(new Run(this.data[this.questionID].Question)));
-			this.AnswerFlowDocument.Blocks.Add(new Paragraph(new Run(this.data[this.questionID].Option[this.data[this.questionID].AnswerID])));
+			this.QuestionTextBox.Text = this.data[this.questionID].Question;
+			this.AnswerTextBox.Text = this.data[this.questionID].Option[this.data[this.questionID].AnswerID];
 			foreach (string documentName in this.data[this.questionID].DocumentNames) {
-				string text = File.ReadAllText($"data\\tagqa\\documents\\{documentName}.txt");
+				string text = File.ReadAllText($"data\\tagpa\\documents\\{documentName}.txt");
 				var documentItem = new DocumentItem() {
 					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
 					Context = text,
 				};
-				documentItem.ContextRichTextBox.Width = 360;
+				documentItem.Width = 400D;
+				documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
+				documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
 				this.ContextWrapPanel.Children.Add(documentItem);
 			}
-			this.ContextScrollViewer.ScrollToLeftEnd();
 		}
-		
-		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
 
+		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+			if (this.ContextWrapPanel is null) return;
+			foreach (var child in this.ContextWrapPanel.Children) {
+				DocumentItem documentItem = child as DocumentItem;
+				double fontSize = documentItem.ContextFlowDocument.FontSize;
+				try { fontSize = double.Parse(this.FontSizeTextBox.Text) / 3D * 2D; } catch { }
+				documentItem.ContextFlowDocument.FontSize = fontSize;
+			}
+		}
+
+		private void QATextBox_SelectionChanged(object sender, RoutedEventArgs e) {
+			this.selectedText = (sender as TextBox).SelectedText;
+			if (this.selectedText == string.Empty) this.UnmarkDocument();
+			else this.MarkDocument();
+		}
+
+		private void MarkDocument() {
+			if (this.focusedDocumentItem is null) return;
+			int none = -1;
+			Mark.MarkAnswer(this.focusedDocumentItem.ContextFlowDocument,
+				this.focusedDocumentItem.Context, this.selectedText, ref none);
+		}
+
+		private void UnmarkDocument() {
+			if (this.focusedDocumentItem is null) return;
+			Mark.UnmarkAnswer(this.focusedDocumentItem.ContextFlowDocument,
+				this.focusedDocumentItem.Context);
+		}
+
+		private void QATextBox_LostFocus(object sender, RoutedEventArgs e) =>
+			(sender as TextBox).Select(0, 0);
+
+		private void ContextDocumentItem_GotFocus(object sender, RoutedEventArgs e) {
+			this.focusedDocumentItem = (sender as DocumentItem);
+			if (this.selectedText != string.Empty) this.MarkDocument();
+		}
+
+		private void ContextDocumentItem_LostFocus(object sender, RoutedEventArgs e) {
+			this.UnmarkDocument();
+			this.focusedDocumentItem = null;
 		}
 
 		private void SaveButton_Click(object sender, RoutedEventArgs e) {
+
+		}
+
+		private void AbortButton_Click(object sender, RoutedEventArgs e) {
 
 		}
 	}

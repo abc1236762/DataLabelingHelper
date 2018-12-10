@@ -70,6 +70,8 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="5"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
 				<TextBlock Grid.Column="4" Text="大小" VerticalAlignment="Center"/>
 				<TextBox
@@ -78,9 +80,13 @@
 					TextChanged="FontSizeTextBox_TextChanged"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
 				<Button
-					x:Name="SaveButton" Grid.Column="8" Content="儲存標記結果" IsEnabled="False"
+					x:Name="SaveButton" Grid.Column="8" Content="儲存" IsEnabled="False"
 					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
 					Click="SaveButton_Click"/>
+				<Button
+					x:Name="AbortButton" Grid.Column="10" Content="捨棄" IsEnabled="False"
+					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
+					Click="AbortButton_Click"/>
 			</Grid>
 		</Grid>
 		<Grid Grid.Column="1" Grid.Row="3">
@@ -91,47 +97,21 @@
 				<RowDefinition Height="10"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
-			<RichTextBox
-				Grid.Row="0" AutoWordSelection="False" IsReadOnly="True"
-				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"
-				VerticalScrollBarVisibility="Auto" >
-				<FlowDocument
-					x:Name="QuestionFlowDocument" Language="zh-tw" 
-					FontSize="{Binding Text, ElementName=FontSizeTextBox}">
-					<FlowDocument.Resources>
-						<Style TargetType="{x:Type Paragraph}">
-							<Setter Property="Margin" Value="0"/>
-							<Setter
-								Property="FontSize"
-								Value="{Binding Text, ElementName=FontSizeTextBox}"/>
-						</Style>
-					</FlowDocument.Resources>
-				</FlowDocument>
-			</RichTextBox>
-			<RichTextBox
-				Grid.Row="2" AutoWordSelection="False" IsReadOnly="True"
-				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"
-				VerticalScrollBarVisibility="Auto" >
-				<FlowDocument
-					x:Name="AnswerFlowDocument" Language="zh-tw" 
-					FontSize="{Binding Text, ElementName=FontSizeTextBox}">
-					<FlowDocument.Resources>
-						<Style TargetType="{x:Type Paragraph}">
-							<Setter Property="Margin" Value="0"/>
-							<Setter
-								Property="FontSize"
-								Value="{Binding Text, ElementName=FontSizeTextBox}"/>
-						</Style>
-					</FlowDocument.Resources>
-				</FlowDocument>
-			</RichTextBox>
+			<TextBox 
+				x:Name="QuestionTextBox" Grid.Row="0" TextWrapping="Wrap" IsReadOnly="True"
+				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
+				FontSize="{Binding Text, ElementName=FontSizeTextBox}"
+				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
+			<TextBox 
+				x:Name="AnswerTextBox" Grid.Row="2" TextWrapping="Wrap" IsReadOnly="True"
+				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
+				FontSize="{Binding Text, ElementName=FontSizeTextBox}"
+				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 			<ScrollViewer
-				x:Name="ContextScrollViewer" Grid.Row="4" VerticalContentAlignment="Stretch"
+				x:Name="ContextScrollViewer" Grid.Row="4"
 				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-				<Border BorderBrush="Red" BorderThickness="1">
-					<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal"/>
-				</Border>
-				</ScrollViewer>
+				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" FocusManager.IsFocusScope="True"/>
+			</ScrollViewer>
 		</Grid>
 	</Grid>
 </Window>
