@@ -49,11 +49,11 @@ namespace DataLabelingHelper
             Context.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList().ForEach(Line =>
             {
                 Paragraph ContextParagraph = new Paragraph();
-                Regex.Split(Line, $"({Regex.Escape(Answer)})").ToList().ForEach(Text =>
+                Regex.Split(Line, $"({Regex.Escape(Answer.Trim())})", RegexOptions.IgnoreCase).ToList().ForEach(Text =>
                 {
                     Run Run = new Run(Text);
                     ContextParagraph.Inlines.Add(Run);
-                    if (Text == Answer)
+                    if (Text.ToLower() == Answer.Trim().ToLower())
                     {
                         Run.Foreground = AnswerForegroundBrush;
                         Run.Background = AnswerBackgroundBrush;

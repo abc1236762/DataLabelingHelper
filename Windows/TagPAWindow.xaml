@@ -108,9 +108,9 @@
 				FontSize="{Binding Text, ElementName=FontSizeTextBox}"
 				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 			<ScrollViewer
-				x:Name="ContextScrollViewer" Grid.Row="4"
+				x:Name="ContextScrollViewer" Grid.Row="4" FocusManager.IsFocusScope="True"
 				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" FocusManager.IsFocusScope="True"/>
+				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" />
 			</ScrollViewer>
 		</Grid>
 	</Grid>

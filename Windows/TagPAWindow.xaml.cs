@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualBasic.FileIO;
@@ -19,16 +21,16 @@ namespace DataLabelingHelper
 			public readonly string Question;
 			public readonly string[] DocumentNames;
 			public readonly int AnswerID;
-			public readonly Dictionary<int, string> Option;
+			public readonly Dictionary<int, string> Options;
 
 			public Item(string[] data) {
 				this.Question = data[1];
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
 				this.AnswerID = int.Parse(data[12]);
-				this.Option = new Dictionary<int, string>();
+				this.Options = new Dictionary<int, string>();
 				for (int i = 13; i < 29; i += 2) {
-					if (data[i] != string.Empty) this.Option.Add(int.Parse(data[i]), data[i + 1]);
+					if (data[i] != string.Empty) this.Options.Add(int.Parse(data[i]), data[i + 1]);
 				}
 			}
 		}
@@ -42,9 +44,9 @@ namespace DataLabelingHelper
 		public TagPAWindow() {
 			this.InitializeComponent();
 
-			if (Directory.Exists("data\\tagpa\\")) {
+			if (Directory.Exists(@"data\tagpa\")) {
 				this.InputComboBox.Items.Clear();
-				Directory.GetFiles("data\\tagpa\\", "*.csv").ToList().ForEach(filePath => {
+				Directory.GetFiles(@"data\tagpa\", "*.csv").ToList().ForEach(filePath => {
 					this.InputComboBox.Items.Add(Path.GetFileNameWithoutExtension(filePath));
 				});
 				this.GetSelectedFile();
@@ -79,7 +81,7 @@ namespace DataLabelingHelper
 		}
 
 		private void ParseData() {
-			string filePath = $"data\\tagpa\\{this.InputComboBox.SelectedItem as string}.csv";
+			string filePath = $@"data\tagpa\{this.InputComboBox.SelectedItem as string}.csv";
 			TextFieldParser parser = new TextFieldParser(filePath) {
 				TextFieldType = FieldType.Delimited,
 			};
@@ -138,7 +140,9 @@ namespace DataLabelingHelper
 			if (this.CurrentComboBox.SelectedIndex <= 0) {
 				this.PreviousButton.IsEnabled = false;
 				this.NextButton.IsEnabled = true;
-			} else if (this.CurrentComboBox.SelectedIndex > 0 && this.CurrentComboBox.SelectedIndex < this.CurrentComboBox.Items.Count - 1) {
+			} else if (this.CurrentComboBox.SelectedIndex > 0 &&
+				this.CurrentComboBox.SelectedIndex <
+				this.CurrentComboBox.Items.Count - 1) {
 				this.PreviousButton.IsEnabled = true;
 				this.NextButton.IsEnabled = true;
 			} else {
@@ -147,9 +151,10 @@ namespace DataLabelingHelper
 			}
 
 			this.QuestionTextBox.Text = this.data[this.questionID].Question;
-			this.AnswerTextBox.Text = this.data[this.questionID].Option[this.data[this.questionID].AnswerID];
+			this.AnswerTextBox.Text = this.data[this.questionID].Options[this.data[this.questionID].AnswerID];
 			foreach (string documentName in this.data[this.questionID].DocumentNames) {
-				string text = File.ReadAllText($"data\\tagpa\\documents\\{documentName}.txt");
+				string text = WebUtility.HtmlDecode(Regex.Replace(
+					File.ReadAllText($@"data\tagpa\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;"));
 				var documentItem = new DocumentItem() {
 					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
 					Context = text,
@@ -159,6 +164,7 @@ namespace DataLabelingHelper
 				documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
 				this.ContextWrapPanel.Children.Add(documentItem);
 			}
+			this.ContextScrollViewer.ScrollToLeftEnd();
 		}
 
 		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
@@ -203,12 +209,40 @@ namespace DataLabelingHelper
 			this.focusedDocumentItem = null;
 		}
 
+		private void SaveFile(string line) {
+			string filename = DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv";
+			string filePath = $@"work\tagpa\{filename}";
+			if (!Directory.Exists(@"work\tagpa\"))
+				Directory.CreateDirectory(@"work\tagpa\");
+			List<string> lines = new List<string>();
+			if (!File.Exists(filePath))
+				lines.Add("QuestionID,DocumentsHaveAnswerNo.");
+			lines.Add(line);
+			File.AppendAllLines(filePath, lines);
+			this.CurrentComboBox.SelectedIndex =
+				this.CurrentComboBox.SelectedIndex < 
+				this.CurrentComboBox.Items.Count - 1 ?
+				this.CurrentComboBox.SelectedIndex + 1 : -1;
+		}
+
 		private void SaveButton_Click(object sender, RoutedEventArgs e) {
-
+			List<int> taggedIDs = new List<int>();
+			List<int> unlockedIDs = new List<int>();
+			foreach (var child in this.ContextWrapPanel.Children) {
+				DocumentItem documentItem = child as DocumentItem;
+				if (documentItem.LockToggleButton.IsChecked == true) {
+					if (documentItem.TagButton.Content is "正確")
+						taggedIDs.Add(documentItem.Line);
+				} else unlockedIDs.Add(documentItem.Line);
+			}
+			if (unlockedIDs.Count > 0) {
+				MessageBox.Show($"第{string.Join("、", unlockedIDs)}篇文章未確定。");
+				return;
+			}
+			this.SaveFile($"{this.questionID},{string.Join(" ", taggedIDs)}");
 		}
 
-		private void AbortButton_Click(object sender, RoutedEventArgs e) {
-
-		}
+		private void AbortButton_Click(object sender, RoutedEventArgs e) =>
+			this.SaveFile($"{this.questionID},UnrecognizableQuestion");
 	}
 }
