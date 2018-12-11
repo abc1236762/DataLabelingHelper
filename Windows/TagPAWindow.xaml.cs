@@ -40,6 +40,12 @@ namespace DataLabelingHelper
 		private Dictionary<string, Item> data;
 		private DocumentItem focusedDocumentItem = null;
 		private string selectedText = string.Empty;
+		private readonly Dictionary<string, string> Modes = new Dictionary<string, string> {
+			{"標　　　　記", string.Empty },
+			{"問題無法辨識", "QuestionIsUnrecognizable" },
+			{"答案無法辨識", "AnswerIsUnrecognizable" },
+			{"答案可能錯誤", "AnswerIsProbablyWrong" },
+		};
 
 		public TagPAWindow() {
 			this.InitializeComponent();
@@ -135,7 +141,8 @@ namespace DataLabelingHelper
 			this.AnswerTextBox.Text = string.Empty;
 			this.ContextWrapPanel.Children.Clear();
 
-			this.AbortButton.IsEnabled = this.SaveButton.IsEnabled =
+			this.ModeButton.Content = this.Modes.Keys.First();
+			this.ModeButton.IsEnabled = this.SaveButton.IsEnabled =
 				this.CurrentComboBox.SelectedIndex != -1;
 			if (this.CurrentComboBox.SelectedIndex <= 0) {
 				this.PreviousButton.IsEnabled = false;
@@ -209,6 +216,12 @@ namespace DataLabelingHelper
 			this.focusedDocumentItem = null;
 		}
 
+		private void ModeButton_Click(object sender, RoutedEventArgs e) {
+			int index = this.Modes.Keys.ToList().IndexOf(this.ModeButton.Content as string);
+			index = index == this.Modes.Count - 1 ? 0 : index + 1;
+			this.ModeButton.Content = this.Modes.Keys.ToArray()[index];
+		}
+
 		private void SaveFile(string line) {
 			string filename = DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv";
 			string filePath = $@"work\tagpa\{filename}";
@@ -220,29 +233,31 @@ namespace DataLabelingHelper
 			lines.Add(line);
 			File.AppendAllLines(filePath, lines);
 			this.CurrentComboBox.SelectedIndex =
-				this.CurrentComboBox.SelectedIndex < 
+				this.CurrentComboBox.SelectedIndex <
 				this.CurrentComboBox.Items.Count - 1 ?
 				this.CurrentComboBox.SelectedIndex + 1 : -1;
 		}
 
 		private void SaveButton_Click(object sender, RoutedEventArgs e) {
-			List<int> taggedIDs = new List<int>();
-			List<int> unlockedIDs = new List<int>();
-			foreach (var child in this.ContextWrapPanel.Children) {
-				DocumentItem documentItem = child as DocumentItem;
-				if (documentItem.LockToggleButton.IsChecked == true) {
-					if (documentItem.TagButton.Content is "正確")
-						taggedIDs.Add(documentItem.Line);
-				} else unlockedIDs.Add(documentItem.Line);
-			}
-			if (unlockedIDs.Count > 0) {
-				MessageBox.Show($"第{string.Join("、", unlockedIDs)}篇文章未確定。");
-				return;
-			}
-			this.SaveFile($"{this.questionID},{string.Join(" ", taggedIDs)}");
+			string line = $"{this.questionID},";
+			string modeValue = this.Modes[this.ModeButton.Content as string];
+			if (modeValue == string.Empty) {
+				List<int> taggedIDs = new List<int>();
+				List<int> unlockedIDs = new List<int>();
+				foreach (var child in this.ContextWrapPanel.Children) {
+					DocumentItem documentItem = child as DocumentItem;
+					if (documentItem.LockToggleButton.IsChecked == true) {
+						if (documentItem.TagButton.Content is "正確")
+							taggedIDs.Add(documentItem.Line);
+					} else unlockedIDs.Add(documentItem.Line);
+				}
+				if (unlockedIDs.Count > 0) {
+					MessageBox.Show($"第{string.Join("、", unlockedIDs)}篇文章未確定。");
+					return;
+				}
+				line += string.Join(" ", taggedIDs);
+			} else line += modeValue;
+			this.SaveFile(line);
 		}
-
-		private void AbortButton_Click(object sender, RoutedEventArgs e) =>
-			this.SaveFile($"{this.questionID},UnrecognizableQuestion");
 	}
 }

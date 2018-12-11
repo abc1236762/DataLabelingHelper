@@ -80,13 +80,13 @@
 					TextChanged="FontSizeTextBox_TextChanged"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
 				<Button
-					x:Name="SaveButton" Grid.Column="8" Content="儲存" IsEnabled="False"
+					x:Name="ModeButton" Grid.Column="8" Content="標　　　　記" IsEnabled="False"
+					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
+					Click="ModeButton_Click"/>
+				<Button
+					x:Name="SaveButton" Grid.Column="10" Content="儲存" IsEnabled="False"
 					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
 					Click="SaveButton_Click"/>
-				<Button
-					x:Name="AbortButton" Grid.Column="10" Content="捨棄" IsEnabled="False"
-					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
-					Click="AbortButton_Click"/>
 			</Grid>
 		</Grid>
 		<Grid Grid.Column="1" Grid.Row="3">
