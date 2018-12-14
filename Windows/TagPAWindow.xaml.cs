@@ -7,6 +7,8 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
+using System.Xml;
 using Microsoft.VisualBasic.FileIO;
 
 namespace DataLabelingHelper
@@ -159,6 +161,18 @@ namespace DataLabelingHelper
 
 			this.QuestionTextBox.Text = this.data[this.questionID].Question;
 			this.AnswerTextBox.Text = this.data[this.questionID].Options[this.data[this.questionID].AnswerID];
+			this.OptionsWrapPanel.Children.Clear();
+			foreach (string option in this.data[this.questionID].Options.Values) {
+				if (option == this.AnswerTextBox.Text) continue;
+				TextBox textBox = XamlReader.Load(XmlReader.Create(
+					new StringReader(XamlWriter.Save(this.AnswerTextBox)))) as TextBox;
+				textBox.Text = option;
+				textBox.SelectionChanged += this.QATextBox_SelectionChanged;
+				textBox.LostFocus += this.QATextBox_LostFocus;
+				this.OptionsWrapPanel.Children.Add(textBox);
+			}
+
+
 			foreach (string documentName in this.data[this.questionID].DocumentNames) {
 				string text = WebUtility.HtmlDecode(Regex.Replace(
 					File.ReadAllText($@"data\tagpa\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;"));
@@ -176,6 +190,12 @@ namespace DataLabelingHelper
 
 		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
 			if (this.ContextWrapPanel is null) return;
+			foreach (var child in this.OptionsWrapPanel.Children) {
+				TextBox textBox = child as TextBox;
+				double fontSize = textBox.FontSize;
+				try { fontSize = double.Parse(this.FontSizeTextBox.Text); } catch { }
+				textBox.FontSize = fontSize;
+			}
 			foreach (var child in this.ContextWrapPanel.Children) {
 				DocumentItem documentItem = child as DocumentItem;
 				double fontSize = documentItem.ContextFlowDocument.FontSize;
