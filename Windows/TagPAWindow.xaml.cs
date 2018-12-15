@@ -94,11 +94,14 @@ namespace DataLabelingHelper
 				TextFieldType = FieldType.Delimited,
 			};
 			parser.SetDelimiters(",");
-
+			var lines = new Dictionary<string, string>();
 			this.data = new Dictionary<string, Item>();
 			string[] title = parser.ReadFields();
 			while (!parser.EndOfData) {
 				string[] row = parser.ReadFields();
+				string line = string.Join(",", row.Skip(1));
+				if (lines.ContainsValue(line)) continue;
+				lines.Add(row[0], string.Join(",", row.Skip(1)));
 				this.data.Add(row[0], new Item(row));
 			}
 		}
@@ -180,7 +183,7 @@ namespace DataLabelingHelper
 					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
 					Context = text,
 				};
-				documentItem.Width = 400D;
+				documentItem.Width = 382D;
 				documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
 				documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
 				this.ContextWrapPanel.Children.Add(documentItem);
