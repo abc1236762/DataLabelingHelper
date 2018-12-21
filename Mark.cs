@@ -11,9 +11,10 @@ namespace DataLabelingHelper
     public static class Mark
     {
         public static SolidColorBrush InlineBackgroundBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0xFF, 0x00, 0x00));
-        public static SolidColorBrush AnswerForegroundBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x1E, 0x1E, 0x1E));
-        public static SolidColorBrush AnswerBackgroundBrush = new SolidColorBrush(Color.FromArgb(0x9F, 0xDC, 0xDC, 0xDC));
+		public static SolidColorBrush AnswerForegroundBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x1E, 0x1E, 0x1E));
+		public static SolidColorBrush AnswerBackgroundBrush = new SolidColorBrush(Color.FromArgb(0x9F, 0xDC, 0xDC, 0xDC));
         public static SolidColorBrush TaggedForegroundBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xDC, 0xDC, 0xDC));
+		public static SolidColorBrush HighLineBackgroundBrush = new SolidColorBrush(Color.FromArgb(0x9F, 0x9C, 0x9C, 0x9C));
 
         public static bool CheckAnswer(string Context, string Question, string Answer, int AnswerNumber, int Number, ref string Answers, ref int AnswerCount)
         {
@@ -46,16 +47,19 @@ namespace DataLabelingHelper
             int AnswerNumberNow = AnswerNumber;
             ContextFlowDocument.Blocks.Clear();
 
-            Context.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList().ForEach(Line =>
+            Context.Split(new string[] { "\r", "\n", "\r\n" }, StringSplitOptions.None).ToList().ForEach(Line =>
             {
                 Paragraph ContextParagraph = new Paragraph();
+				bool isAnswerInLine = Line.ToLower().Contains(Answer.Trim().ToLower());
                 Regex.Split(Line, $"({Regex.Escape(Answer.Trim())})", RegexOptions.IgnoreCase).ToList().ForEach(Text =>
                 {
                     Run Run = new Run(Text);
                     ContextParagraph.Inlines.Add(Run);
-                    if (Text.ToLower() == Answer.Trim().ToLower())
+					bool isAnswer = Text.ToLower() == Answer.Trim().ToLower();
+					if (isAnswerInLine) Run.Foreground = AnswerForegroundBrush;
+					if (isAnswerInLine && !isAnswer) Run.Background = HighLineBackgroundBrush;
+					if (isAnswer)
                     {
-                        Run.Foreground = AnswerForegroundBrush;
                         Run.Background = AnswerBackgroundBrush;
 						if (AnswerNumberNow > 0) {
 							TextBlock Inline = new TextBlock()

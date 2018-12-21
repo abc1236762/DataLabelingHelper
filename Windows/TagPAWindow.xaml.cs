@@ -183,7 +183,6 @@ namespace DataLabelingHelper
 					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
 					Context = text,
 				};
-				documentItem.Width = 382D;
 				documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
 				documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
 				this.ContextWrapPanel.Children.Add(documentItem);
@@ -204,6 +203,7 @@ namespace DataLabelingHelper
 				double fontSize = documentItem.ContextFlowDocument.FontSize;
 				try { fontSize = double.Parse(this.FontSizeTextBox.Text) / 3D * 2D; } catch { }
 				documentItem.ContextFlowDocument.FontSize = fontSize;
+				documentItem.AdjustWidth();
 			}
 		}
 
@@ -270,7 +270,7 @@ namespace DataLabelingHelper
 				foreach (var child in this.ContextWrapPanel.Children) {
 					DocumentItem documentItem = child as DocumentItem;
 					if (documentItem.LockToggleButton.IsChecked == true) {
-						if (documentItem.TagButton.Content is "正確")
+						if (documentItem.TagButton.Content is "有幫助")
 							taggedIDs.Add(documentItem.Line);
 					} else unlockedIDs.Add(documentItem.Line);
 				}

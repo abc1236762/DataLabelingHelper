@@ -32,17 +32,16 @@
 				<Run>篇</Run>
 			</TextBlock>
 			<Button
-				x:Name="TagButton" Content="錯誤" Grid.Column="2" Click="TagButton_Click"
+				x:Name="TagButton" Content="無幫助" Grid.Column="2" Click="TagButton_Click"
 				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
 			<ToggleButton
 				x:Name="LockToggleButton" Content="確定" Grid.Column="4"
 				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
 		</Grid>
 		<RichTextBox
-			x:Name="ContextRichTextBox" Grid.Column="1" Grid.Row="3" IsReadOnly="True" AutoWordSelection="False"
-			TextChanged="ContextRichTextBox_TextChanged" LostFocus="ContextRichTextBox_LostFocus"
+			x:Name="ContextRichTextBox" Grid.Column="1" Grid.Row="3" IsReadOnly="True"
 			Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"
-			VerticalScrollBarVisibility="Auto">
+			VerticalScrollBarVisibility="Auto"  AutoWordSelection="False" HorizontalAlignment="Left">
 			<FlowDocument x:Name="ContextFlowDocument" FontSize="16" Language="zh-tw" >
 				<FlowDocument.Resources>
 					<Style TargetType="{x:Type Paragraph}">
