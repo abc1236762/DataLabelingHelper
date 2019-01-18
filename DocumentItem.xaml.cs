@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using static DataLabelingHelper.MainWindow;
 
 namespace DataLabelingHelper
 {
@@ -39,6 +40,10 @@ namespace DataLabelingHelper
 		private void TagButton_Click(object sender, RoutedEventArgs e) {
 			if (this.LockToggleButton.IsChecked == false)
 				this.TagButton.Content = this.TagButton.Content is "有幫助" ? "無幫助" : "有幫助";
+			double scrollOffset = TagPA.ContextScrollViewer.ScrollableWidth *
+				this.Line / TagPA.ContextWrapPanel.Children.Count;
+			if (this.TagButton.Content is "有幫助" && TagPA.ContextScrollViewer.HorizontalOffset < scrollOffset)
+				TagPA.ContextScrollViewer.ScrollToHorizontalOffset(scrollOffset);
 		}
 
 		public void AdjustWidth() {
