@@ -44,7 +44,7 @@ namespace DataLabelingHelper
 
 		private void LockToggleButton_Checked(object sender, RoutedEventArgs e) {
 			double scrollOffset = TagPA.ContextScrollViewer.ScrollableWidth *
-				this.Line / TagPA.ContextWrapPanel.Children.Count;
+				this.Line / (TagPA.ContextWrapPanel.Children.Count - 1);
 			if (TagPA.ContextScrollViewer.HorizontalOffset < scrollOffset)
 				TagPA.ContextScrollViewer.ScrollToHorizontalOffset(scrollOffset);
 		}
