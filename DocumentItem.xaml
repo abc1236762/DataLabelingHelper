@@ -35,7 +35,7 @@
 				x:Name="TagButton" Content="無幫助" Grid.Column="2" Click="TagButton_Click"
 				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
 			<ToggleButton
-				x:Name="LockToggleButton" Content="確定" Grid.Column="4"
+				x:Name="LockToggleButton" Content="確定" Grid.Column="4" Checked="LockToggleButton_Checked"
 				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
 		</Grid>
 		<RichTextBox
