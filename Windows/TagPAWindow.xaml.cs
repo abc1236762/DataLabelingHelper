@@ -32,7 +32,8 @@ namespace DataLabelingHelper
 				this.AnswerID = int.Parse(data[12]);
 				this.Options = new Dictionary<int, string>();
 				for (int i = 13; i < 29; i += 2) {
-					if (data[i] != string.Empty) this.Options.Add(int.Parse(data[i]), data[i + 1]);
+					string option = data[i + 1].Trim().TrimEnd('。');
+					if (data[i] != string.Empty) this.Options.Add(int.Parse(data[i]), option);
 				}
 			}
 		}
@@ -54,9 +55,14 @@ namespace DataLabelingHelper
 
 			if (Directory.Exists(@"data\tagpa\")) {
 				this.InputComboBox.Items.Clear();
-				Directory.GetFiles(@"data\tagpa\", "*.csv").ToList().ForEach(filePath => {
-					this.InputComboBox.Items.Add(Path.GetFileNameWithoutExtension(filePath));
-				});
+				foreach(string directoryPath in Directory.GetDirectories(@"data\tagpa\")) {
+					Directory.GetFiles(directoryPath, "*.csv").ToList().ForEach(filePath => {
+						string directoryName = Path.GetFileName(directoryPath);
+						string fileName = Path.GetFileNameWithoutExtension(filePath);
+						if (directoryName != fileName) throw new FileNotFoundException();
+						this.InputComboBox.Items.Add(fileName);
+					});
+				}
 				this.GetSelectedFile();
 			}
 		}
@@ -88,8 +94,41 @@ namespace DataLabelingHelper
 			}
 		}
 
+		private bool IsDataItemDuplicate() {
+			Item newItem = this.data[this.questionID];
+			foreach (KeyValuePair<string, Item> pair in this.data) {
+				if (pair.Key == this.questionID) continue;
+				int equalCount;
+				Item item = pair.Value;
+
+				if (item.Question != newItem.Question) continue;
+				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的問題相同。");
+				if (item.Options.Count != newItem.Options.Count) continue;
+				equalCount = 0;
+				foreach (var option in item.Options) {
+					if (!newItem.Options.Contains(option)) break;
+					equalCount += 1;
+				}
+				if (equalCount != item.Options.Count) continue;
+				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的選項相同。");
+				if (item.AnswerID != newItem.AnswerID) continue;
+				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的答案相同。");
+				if (item.DocumentNames.Length != newItem.DocumentNames.Length) continue;
+				equalCount = 0;
+				foreach (var name in item.DocumentNames) {
+					if (Array.IndexOf(newItem.DocumentNames, name) < 0) break;
+					equalCount += 1;
+				}
+				if (equalCount != item.DocumentNames.Length) continue;
+				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的文章相同。");
+				MessageBox.Show($"跳過Question ID {this.questionID}。");
+				return true;
+			}
+			return false;
+		}
+
 		private void ParseData() {
-			string filePath = $@"data\tagpa\{this.InputComboBox.SelectedItem as string}.csv";
+			string filePath = $@"data\tagpa\{this.dataFile}\{this.dataFile}.csv";
 			TextFieldParser parser = new TextFieldParser(filePath) {
 				TextFieldType = FieldType.Delimited,
 			};
@@ -102,6 +141,7 @@ namespace DataLabelingHelper
 				string line = string.Join(",", row.Skip(1));
 				if (lines.ContainsValue(line)) continue;
 				lines.Add(row[0], string.Join(",", row.Skip(1)));
+				Item item = new Item(row);
 				this.data.Add(row[0], new Item(row));
 			}
 		}
@@ -139,8 +179,16 @@ namespace DataLabelingHelper
 			this.CurrentComboBox.SelectedIndex += 1;
 
 		private void CurrentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			if (this.CurrentComboBox.Items.Count == 0) {
+				this.CurrentComboBox.IsEnabled = false;
+				this.PreviousButton.IsEnabled = false;
+				this.NextButton.IsEnabled = false;
+				return;
+			}
+
 			this.questionID = this.CurrentComboBox.SelectedItem as string;
 			this.SaveSettings();
+			if (this.IsDataItemDuplicate()) this.CurrentComboBox.SelectedIndex += 1;
 
 			this.QuestionTextBox.Text = string.Empty;
 			this.AnswerTextBox.Text = string.Empty;
@@ -178,7 +226,8 @@ namespace DataLabelingHelper
 
 			foreach (string documentName in this.data[this.questionID].DocumentNames) {
 				string text = WebUtility.HtmlDecode(Regex.Replace(
-					File.ReadAllText($@"data\tagpa\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;"));
+					File.ReadAllText($@"data\tagpa\{this.dataFile
+					}\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;"));
 				var documentItem = new DocumentItem() {
 					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
 					Context = text,
@@ -252,7 +301,7 @@ namespace DataLabelingHelper
 				Directory.CreateDirectory(@"work\tagpa\");
 			List<string> lines = new List<string>();
 			if (!File.Exists(filePath))
-				lines.Add("QuestionID,DocumentsHaveAnswerNo.");
+				lines.Add("Dataset,QuestionID,Result");
 			lines.Add(line);
 			File.AppendAllLines(filePath, lines);
 			this.CurrentComboBox.SelectedIndex =
@@ -262,7 +311,7 @@ namespace DataLabelingHelper
 		}
 
 		private void SaveButton_Click(object sender, RoutedEventArgs e) {
-			string line = $"{this.questionID},";
+			string line = $"{this.dataFile},{this.questionID},";
 			string modeValue = this.Modes[this.ModeButton.Content as string];
 			if (modeValue == string.Empty) {
 				List<int> taggedIDs = new List<int>();
