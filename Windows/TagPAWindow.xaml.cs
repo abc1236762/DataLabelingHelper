@@ -45,8 +45,9 @@ namespace DataLabelingHelper
 		private string selectedText = string.Empty;
 		private readonly Dictionary<string, string> Modes = new Dictionary<string, string> {
 			{"標　　　　記", string.Empty },
-			{"問題無法辨識", "QuestionIsUnrecognizable" },
+			{"問題可能錯誤", "QuestionIsProbablyWrong" },
 			{"答案無法辨識", "AnswerIsUnrecognizable" },
+			{"問題無法辨識", "QuestionIsUnrecognizable" },
 			{"答案可能錯誤", "AnswerIsProbablyWrong" },
 		};
 
