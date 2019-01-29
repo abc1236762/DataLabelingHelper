@@ -26,13 +26,13 @@ namespace DataLabelingHelper
 			public readonly Dictionary<int, string> Options;
 
 			public Item(string[] data) {
-				this.Question = data[1];
+				this.Question = Regex.Replace(data[1], @"^[A-Za-z0-9 -]+\.", "").Trim();
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
 				this.AnswerID = int.Parse(data[12]);
 				this.Options = new Dictionary<int, string>();
 				for (int i = 13; i < 29; i += 2) {
-					string option = data[i + 1].Trim().TrimEnd('。');
+					string option = data[i + 1].Trim().TrimEnd('。', '.');
 					if (data[i] != string.Empty) this.Options.Add(int.Parse(data[i]), option);
 				}
 			}
@@ -98,32 +98,35 @@ namespace DataLabelingHelper
 		private bool IsDataItemDuplicate() {
 			Item newItem = this.data[this.questionID];
 			foreach (KeyValuePair<string, Item> pair in this.data) {
-				if (pair.Key == this.questionID) continue;
-				int equalCount;
+				if (pair.Key == this.questionID) break;
 				Item item = pair.Value;
-
-				if (item.Question != newItem.Question) continue;
-				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的問題相同。");
-				if (item.Options.Count != newItem.Options.Count) continue;
-				equalCount = 0;
-				foreach (var option in item.Options) {
-					if (!newItem.Options.Contains(option)) break;
-					equalCount += 1;
-				}
-				if (equalCount != item.Options.Count) continue;
-				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的選項相同。");
-				if (item.AnswerID != newItem.AnswerID) continue;
-				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的答案相同。");
-				if (item.DocumentNames.Length != newItem.DocumentNames.Length) continue;
-				equalCount = 0;
+				if (Regex.Replace(item.Question, "[，。？：（）　,.?:() ]", "").ToLower() !=
+					Regex.Replace(newItem.Question, "[，。？：（）　,.?:() ]", "").ToLower()) continue;
+				string message = $"Question ID {this.questionID}與{pair.Key}的問題相同，";
+				int equalCount = 0;
 				foreach (var name in item.DocumentNames) {
 					if (Array.IndexOf(newItem.DocumentNames, name) < 0) break;
 					equalCount += 1;
 				}
-				if (equalCount != item.DocumentNames.Length) continue;
-				MessageBox.Show($"Question ID {this.questionID}與{pair.Key}的文章相同。");
-				MessageBox.Show($"跳過Question ID {this.questionID}。");
-				return true;
+				message += $"文章{(equalCount == item.DocumentNames.Length ? "" : "不")}相同。";
+				message += $"\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
+				message += newItem.Options.Where(x => x.Key != newItem.AnswerID)
+					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y);
+				message += $"\n{pair.Key}的選項：{item.Options[item.AnswerID]}｜";
+				message += item.Options.Where(x => x.Key != item.AnswerID)
+					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y);
+				if (equalCount != item.DocumentNames.Length) {
+					message += $"\n{this.questionID}的文章：";
+					message += newItem.DocumentNames.Aggregate((x, y) => x + "、" + y);
+					message += $"\n{pair.Key}的文章：";
+					message += item.DocumentNames.Aggregate((x, y) => x + "、" + y);
+				}
+				message += $"\n\n是否跳過？";
+				var result = MessageBoxResult.None;
+				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
+					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
+						MessageBoxImage.Warning, MessageBoxResult.None);
+				return result == MessageBoxResult.Yes;
 			}
 			return false;
 		}

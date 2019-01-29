@@ -26,17 +26,17 @@
 				<ColumnDefinition Width="5"/>
 				<ColumnDefinition Width="Auto"/>
 			</Grid.ColumnDefinitions>
-			<TextBlock Grid.Column="0" VerticalAlignment="Center">
+			<TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16">
 				<Run>第</Run>
 				<Run x:Name="LineRun">00</Run>
 				<Run>篇</Run>
 			</TextBlock>
 			<Button
 				x:Name="TagButton" Content="無幫助" Grid.Column="2" Click="TagButton_Click"
-				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
+				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
 			<ToggleButton
 				x:Name="LockToggleButton" Content="確定" Grid.Column="4" Checked="LockToggleButton_Checked"
-				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"/>
+				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
 		</Grid>
 		<RichTextBox
 			x:Name="ContextRichTextBox" Grid.Column="1" Grid.Row="3" IsReadOnly="True"
