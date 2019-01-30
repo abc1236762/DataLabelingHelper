@@ -26,7 +26,7 @@ namespace DataLabelingHelper
 			public readonly Dictionary<int, string> Options;
 
 			public Item(string[] data) {
-				this.Question = Regex.Replace(data[1], @"^[A-Za-z0-9 -]+\.", "").Trim();
+				this.Question = Regex.Replace(data[1], @"^[\w\p{Pd}\s]+\.", "").Trim();
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
 				this.AnswerID = int.Parse(data[12]);
@@ -100,8 +100,8 @@ namespace DataLabelingHelper
 			foreach (KeyValuePair<string, Item> pair in this.data) {
 				if (pair.Key == this.questionID) break;
 				Item item = pair.Value;
-				if (Regex.Replace(item.Question, "[，。？：（）　,.?:() ]", "").ToLower() !=
-					Regex.Replace(newItem.Question, "[，。？：（）　,.?:() ]", "").ToLower()) continue;
+				if (Regex.Replace(item.Question, @"[，。？：（）,.?:()\s]", "").ToLower() !=
+					Regex.Replace(newItem.Question, @"[，。？：（）,.?:()\s]", "").ToLower()) continue;
 				string message = $"Question ID {this.questionID}與{pair.Key}的問題相同，";
 				int equalCount = 0;
 				foreach (var name in item.DocumentNames) {
