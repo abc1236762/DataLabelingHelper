@@ -17,6 +17,8 @@
 			<RowDefinition Height="5"/>
 			<RowDefinition Height="*"/>
 			<RowDefinition Height="5"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="5"/>
 		</Grid.RowDefinitions>
 		<Grid Grid.Column="1" Grid.Row="1">
 			<Grid.ColumnDefinitions>
@@ -52,5 +54,18 @@
 				</FlowDocument.Resources>
 			</FlowDocument>
 		</RichTextBox>
+		<Grid Grid.Column="1" Grid.Row="5">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="5"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+			<Button
+				x:Name="ScToTcButton" Content="簡體轉正體" Grid.Column="0" Click="ScToTcButton_Click"
+				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
+			<Button
+				x:Name="MergeButton" Content="併入…" Grid.Column="2" Click="MergeButton_Click"
+				Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
+		</Grid>
 	</Grid>
 </UserControl>

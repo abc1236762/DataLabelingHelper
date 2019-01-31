@@ -94,6 +94,8 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="5"/>
 				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="0"/>
+				<RowDefinition Height="0"/> <!-- TODO: Finish regexp match documents -->
 				<RowDefinition Height="10"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
@@ -115,8 +117,22 @@
 					SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 				<WrapPanel x:Name="OptionsWrapPanel" Grid.Column="2" Orientation="Horizontal"/>
 			</Grid>
+			<Grid Grid.Row="4">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<Button
+					x:Name="AddMatchButton" Content="加入匹配" Click="AddMatchButton_Click" Grid.Column="0"
+					Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
+				<TextBox 
+					x:Name="MatchesTextBox" TextWrapping="Wrap" FontSize="16" Grid.Column="2"
+					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
+					TextChanged="MatchesTextBox_TextChanged"/>
+			</Grid>
 			<ScrollViewer
-				x:Name="ContextScrollViewer" Grid.Row="4" FocusManager.IsFocusScope="True"
+				x:Name="ContextScrollViewer" Grid.Row="6" FocusManager.IsFocusScope="True"
 				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" />
 			</ScrollViewer>

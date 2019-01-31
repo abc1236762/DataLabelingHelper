@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Xml;
+
 using Microsoft.VisualBasic.FileIO;
 
 namespace DataLabelingHelper
@@ -228,17 +229,32 @@ namespace DataLabelingHelper
 			}
 
 
-			foreach (string documentName in this.data[this.questionID].DocumentNames) {
+			for (int i = 1; i <= this.data[this.questionID].DocumentNames.Length; i++) {
+				string documentName = this.data[this.questionID].DocumentNames[i - 1];
 				string text = WebUtility.HtmlDecode(Regex.Replace(
 					File.ReadAllText($@"data\tagpa\{this.dataFile
-					}\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;"));
-				var documentItem = new DocumentItem() {
-					Line = Array.IndexOf(this.data[this.questionID].DocumentNames, documentName) + 1,
-					Context = text,
-				};
-				documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
-				documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
-				this.ContextWrapPanel.Children.Add(documentItem);
+					}\documents\{documentName}.txt"), @"&＃(\d+)；", @"&#$1;")).Trim();
+				DocumentItem documentItem = null;
+				foreach (var item in this.ContextWrapPanel.Children.Cast<DocumentItem>()) {
+					string context1 = Regex.Replace(text, @"[，。？：（）,.?:()\s]", "").ToLower();
+					string context2 = Regex.Replace(item.Context, @"[，。？：（）,.?:()\s]", "").ToLower();
+					if (context1 == context2) {
+						documentItem = item;
+						break;
+					}
+				}
+				if (documentItem is null) {
+					documentItem = new DocumentItem() {
+						Lines = new List<int> { i },
+						Context = text,
+					};
+					documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
+					documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
+					this.ContextWrapPanel.Children.Add(documentItem);
+				} else {
+					documentItem.Lines.Add(i);
+					documentItem.UpdateLineRunText();
+				}
 			}
 			this.ContextScrollViewer.ScrollToLeftEnd();
 		}
@@ -324,16 +340,26 @@ namespace DataLabelingHelper
 					DocumentItem documentItem = child as DocumentItem;
 					if (documentItem.LockToggleButton.IsChecked == true) {
 						if (documentItem.TagButton.Content is "有幫助")
-							taggedIDs.Add(documentItem.Line);
-					} else unlockedIDs.Add(documentItem.Line);
+							taggedIDs = taggedIDs.Concat(documentItem.Lines).ToList();
+					} else unlockedIDs = unlockedIDs.Concat(documentItem.Lines).ToList();
 				}
 				if (unlockedIDs.Count > 0) {
+					unlockedIDs.Sort();
 					MessageBox.Show($"第{string.Join("、", unlockedIDs)}篇文章未確定。");
 					return;
 				}
+				taggedIDs.Sort();
 				line += string.Join(" ", taggedIDs);
 			} else line += modeValue;
 			this.SaveFile(line);
+		}
+
+		private void MatchesTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+
+		}
+
+		private void AddMatchButton_Click(object sender, RoutedEventArgs e) {
+
 		}
 	}
 }
