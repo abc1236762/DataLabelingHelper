@@ -102,12 +102,17 @@ namespace DataLabelingHelper
 				var inserted = diff.Where(x => x.Status == DiffStatus.Inserted);
 				var deleted = diff.Where(x => x.Status == DiffStatus.Deleted);
 				string message = $"相同{equal}字元、移除{deleted.Count()}字元、插入{inserted.Count()}字元。";
-				if (deleted.Count() <= 30) {
-					message += $"\n移除字元：{deleted.Select(x => x.Obj1.ToString()).Aggregate((x, y) => x + "、" + y)}。";
-				} else message += $"\n移除字元：（因超過30個不顯示）";
-				if (inserted.Count() <= 30) {
-					message += $"\n插入字元：{inserted.Select(x => x.Obj2.ToString()).Aggregate((x, y) => x + "、" + y)}。";
-				} else message += $"\n插入字元：（因超過30個不顯示）";
+
+				if (deleted.Count() > 0) {
+					if (deleted.Count() <= 30) {
+						message += $"\n移除字元：{deleted.Select(x => x.Obj1.ToString()).Aggregate((x, y) => x + "、" + y)}。";
+					} else message += $"\n移除字元：（因超過30個不顯示）";
+				}
+				if (inserted.Count() > 0) {
+					if (inserted.Count() <= 30) {
+						message += $"\n插入字元：{inserted.Select(x => x.Obj2.ToString()).Aggregate((x, y) => x + "、" + y)}。";
+					} else message += $"\n插入字元：（因超過30個不顯示）";
+				}
 				message += "\n\n是否合併？";
 				var result = MessageBoxResult.None;
 				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)

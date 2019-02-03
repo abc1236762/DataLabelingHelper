@@ -27,7 +27,8 @@ namespace DataLabelingHelper
 			public readonly Dictionary<int, string> Options;
 
 			public Item(string[] data) {
-				this.Question = Regex.Replace(data[1], @"^[\w\p{Pd}\s]+\.", "").Trim();
+				this.Question = Regex.Replace(data[1],
+					@"^[\w\p{Pd}\s]+\.", "", RegexOptions.ECMAScript).Trim();
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
 				this.AnswerID = int.Parse(data[12]);
@@ -100,6 +101,7 @@ namespace DataLabelingHelper
 		private bool IsDataItemDuplicate() {
 			this.duplicateQuestionIDs.Clear();
 			var result = MessageBoxResult.None;
+			string message = string.Empty;
 			Item newItem = this.data[this.questionID];
 			foreach (KeyValuePair<string, Item> pair in this.data) {
 				if (pair.Key == this.questionID) break;
@@ -107,15 +109,15 @@ namespace DataLabelingHelper
 				if (Regex.Replace(item.Question, @"[，。？：（）,.?:()\s]", "").ToLower() !=
 					Regex.Replace(newItem.Question, @"[，。？：（）,.?:()\s]", "").ToLower()) continue;
 				this.duplicateQuestionIDs.Add(pair.Key);
-				if (result != MessageBoxResult.None) continue;
-				string message = $"Question ID {this.questionID}與{pair.Key}的問題相同，";
+				message += $"Question ID {this.questionID}與{pair.Key}的問題相同，文章";
 				int equalCount = 0;
 				foreach (var name in item.DocumentNames) {
 					if (Array.IndexOf(newItem.DocumentNames, name) < 0) break;
 					equalCount += 1;
 				}
-				message += $"文章{(equalCount == item.DocumentNames.Length ? "" : "不")}相同。";
-				message += $"\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
+				if (equalCount == 0) message += "完全不";
+				else if (equalCount < item.DocumentNames.Length) message += "不完全";
+				message += $"相同。\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
 				message += newItem.Options.Where(x => x.Key != newItem.AnswerID)
 					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y);
 				message += $"\n{pair.Key}的選項：{item.Options[item.AnswerID]}｜";
@@ -127,7 +129,10 @@ namespace DataLabelingHelper
 					message += $"\n{pair.Key}的文章：";
 					message += item.DocumentNames.Aggregate((x, y) => x + "、" + y);
 				}
-				message += $"\n\n是否跳過？";
+				message += "\n\n";
+			}
+			if (!string.IsNullOrEmpty(message)) {
+				message += "是否跳過？";
 				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
 					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
 						MessageBoxImage.Warning, MessageBoxResult.None);
@@ -178,6 +183,71 @@ namespace DataLabelingHelper
 				this.CurrentComboBox.SelectedIndex = -1;
 				this.CurrentComboBox.IsEnabled = false;
 			}
+		}
+
+		private Dictionary<string, bool> IsTaggedInAlreadyChecked() {
+			var checkTable =
+				new Dictionary<string, Dictionary<bool, List<(string, int)>>>();
+			if (Directory.Exists(@"work\tagpa\")) {
+				string[] csvFiles = Directory.GetFiles(@"work\tagpa\",
+					"*.csv", SearchOption.AllDirectories);
+				foreach (string csvFile in csvFiles) {
+					VBFileIO.TextFieldParser parser = new VBFileIO.TextFieldParser(csvFile) {
+						TextFieldType = VBFileIO.FieldType.Delimited,
+					};
+					parser.SetDelimiters(",");
+					parser.ReadFields();
+					while (!parser.EndOfData) {
+						string[] row = parser.ReadFields();
+						if (row[0] != this.dataFile) continue;
+						if (this.duplicateQuestionIDs.IndexOf(row[1]) < 0) continue;
+						var documentNames = this.data[row[1]].DocumentNames;
+						int[] ids;
+						if (row[2] != string.Empty) {
+							try {
+								string[] idsString = row[2].Split(' ');
+								ids = new int[idsString.Length];
+								for (int i = 0; i < idsString.Length; i++)
+									ids[i] = int.Parse(idsString[i]) - 1;
+							} catch (FormatException) { continue; }
+						} else ids = new int[0];
+
+						for (int i = 0; i < documentNames.Length; i++) {
+							if (!checkTable.ContainsKey(documentNames[i]))
+								checkTable[documentNames[i]] =
+									new Dictionary<bool, List<(string, int)>>();
+							bool isTagged = Array.IndexOf(ids, i) >= 0;
+							if (!checkTable[documentNames[i]].ContainsKey(isTagged))
+								checkTable[documentNames[i]][isTagged] =
+									new List<(string, int)>();
+							checkTable[documentNames[i]][isTagged].Add((row[1], i));
+						}
+					}
+				}
+			}
+
+			var isTaggedInAlreadyChecked = new Dictionary<string, bool>();
+			string message = string.Empty;
+			foreach (var data in checkTable) {
+				bool isFailed = false;
+				if (data.Value.Keys.Count != 1) {
+					isFailed = true;
+					if (message == string.Empty) message += "發生標記結果不相符的狀況：";
+					message += $"\n將文章{data.Key}標記為";
+					string result(bool value) => 
+						data.Value[value].Select(x => $"問題編號{x.Item1}的第{x.Item2}篇")
+						.Aggregate((x, y) => x + "、" + y);
+					message += $"\n　有幫助⸺{result(true)}";
+					message += $"\n　無幫助⸺{result(false)}";
+				}
+				if (!isFailed) isTaggedInAlreadyChecked[data.Key] = data.Value.Keys.First();
+			}
+
+			if (message != string.Empty)
+				MessageBox.Show(message + "\n\n建議先解決。", "標記結果衝突警告",
+					 MessageBoxButton.OK, MessageBoxImage.Warning);
+
+			return isTaggedInAlreadyChecked;
 		}
 
 		private void PreviousButton_Click(object sender, RoutedEventArgs e) =>
@@ -231,31 +301,7 @@ namespace DataLabelingHelper
 				this.OptionsWrapPanel.Children.Add(textBox);
 			}
 
-			Dictionary<string, bool> isTaggedInAlreadyChecked = new Dictionary<string, bool>();
-			string[] csvFiles = Directory.GetFiles(@"work\tagpa\", "*.csv", SearchOption.AllDirectories);
-			foreach (string csvFile in csvFiles) {
-				VBFileIO.TextFieldParser parser = new VBFileIO.TextFieldParser(csvFile) {
-					TextFieldType = VBFileIO.FieldType.Delimited,
-				};
-				parser.SetDelimiters(",");
-				parser.ReadFields();
-				while (!parser.EndOfData) {
-					string[] row = parser.ReadFields();
-					if (row[0] != this.dataFile) continue;
-					if (this.duplicateQuestionIDs.IndexOf(row[1]) < 0) continue;
-					var documentNames = this.data[row[1]].DocumentNames;
-					bool isTagged = true;
-					foreach (string idString in row[2].Split(' ')) {
-						if (int.TryParse(idString, out int id))
-							isTaggedInAlreadyChecked[documentNames[id - 1]] = true;
-						else { isTagged = false; break; }
-					}
-					if (!isTagged) continue;
-					foreach (string name in documentNames)
-						if (!isTaggedInAlreadyChecked.ContainsKey(name))
-							isTaggedInAlreadyChecked[name] = false;
-				}
-			}
+			var isTaggedInAlreadyChecked = this.IsTaggedInAlreadyChecked();
 
 			for (int i = 1; i <= this.data[this.questionID].DocumentNames.Length; i++) {
 				string documentName = this.data[this.questionID].DocumentNames[i - 1];
