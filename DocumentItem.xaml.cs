@@ -27,7 +27,7 @@ namespace DataLabelingHelper
 		public bool CanScroll { get; set; } = false;
 
 		private FormattedText formattedText;
-		
+
 		public DocumentItem() => this.InitializeComponent();
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e) {

@@ -94,8 +94,8 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="5"/>
 				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="0"/>
-				<RowDefinition Height="0"/> <!-- TODO: Finish regexp match documents -->
+				<RowDefinition Height="5"/>
+				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="10"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
@@ -124,12 +124,13 @@
 					<ColumnDefinition Width="*"/>
 				</Grid.ColumnDefinitions>
 				<Button
-					x:Name="AddMatchButton" Content="加入匹配" Click="AddMatchButton_Click" Grid.Column="0"
-					Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B" FontSize="16"/>
+					x:Name="AddMatchButton" Content="加入匹配" FontSize="16" Grid.Column="0"
+					Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"
+					Click="AddMatchButton_Click" FocusManager.IsFocusScope="True"/>
 				<TextBox 
 					x:Name="MatchesTextBox" TextWrapping="Wrap" FontSize="16" Grid.Column="2"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-					TextChanged="MatchesTextBox_TextChanged"/>
+					TextChanged="MatchesTextBox_TextChanged" FocusManager.IsFocusScope="True"/>
 			</Grid>
 			<ScrollViewer
 				x:Name="ContextScrollViewer" Grid.Row="6" FocusManager.IsFocusScope="True"

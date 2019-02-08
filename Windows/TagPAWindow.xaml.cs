@@ -46,6 +46,7 @@ namespace DataLabelingHelper
 		private List<string> duplicateQuestionIDs = new List<string>();
 		private DocumentItem focusedDocumentItem = null;
 		private string selectedText = string.Empty;
+		private Regex[] selectedRegexs = null;
 		private readonly Dictionary<string, string> Modes = new Dictionary<string, string> {
 			{"標　　　　記", string.Empty },
 			{"問題可能錯誤", "QuestionIsProbablyWrong" },
@@ -234,7 +235,7 @@ namespace DataLabelingHelper
 					isFailed = true;
 					if (message == string.Empty) message += "發生標記結果不相符的狀況：";
 					message += $"\n將文章{data.Key}標記為";
-					string result(bool value) => 
+					string result(bool value) =>
 						data.Value[value].Select(x => $"問題編號{x.Item1}的第{x.Item2}篇")
 						.Aggregate((x, y) => x + "、" + y);
 					message += $"\n　有幫助⸺{result(true)}";
@@ -271,6 +272,7 @@ namespace DataLabelingHelper
 			this.QuestionTextBox.Text = string.Empty;
 			this.AnswerTextBox.Text = string.Empty;
 			this.ContextWrapPanel.Children.Clear();
+			this.MatchesTextBox.Text = string.Empty;
 
 			this.ModeButton.Content = this.Modes.Keys.First();
 			this.ModeButton.IsEnabled = this.SaveButton.IsEnabled =
@@ -355,17 +357,13 @@ namespace DataLabelingHelper
 			}
 		}
 
-		private void QATextBox_SelectionChanged(object sender, RoutedEventArgs e) {
+		private void QATextBox_SelectionChanged(object sender, RoutedEventArgs e) =>
 			this.selectedText = (sender as TextBox).SelectedText;
-			if (this.selectedText == string.Empty) this.UnmarkDocument();
-			else this.MarkDocument();
-		}
 
 		private void MarkDocument() {
 			if (this.focusedDocumentItem is null) return;
-			int none = -1;
-			Mark.MarkAnswer(this.focusedDocumentItem.ContextFlowDocument,
-				this.focusedDocumentItem.Context, this.selectedText, ref none);
+			Mark.MarkAnswerWithRegex(this.focusedDocumentItem.ContextFlowDocument,
+				this.focusedDocumentItem.Context, this.selectedRegexs);
 		}
 
 		private void UnmarkDocument() {
@@ -379,7 +377,7 @@ namespace DataLabelingHelper
 
 		private void ContextDocumentItem_GotFocus(object sender, RoutedEventArgs e) {
 			this.focusedDocumentItem = (sender as DocumentItem);
-			if (this.selectedText != string.Empty) this.MarkDocument();
+			if (this.selectedRegexs != null) this.MarkDocument();
 		}
 
 		private void ContextDocumentItem_LostFocus(object sender, RoutedEventArgs e) {
@@ -434,11 +432,20 @@ namespace DataLabelingHelper
 		}
 
 		private void MatchesTextBox_TextChanged(object sender, TextChangedEventArgs e) {
-
+			string[] strings = this.MatchesTextBox.Text.Split(
+				new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			try {
+				this.selectedRegexs = strings.Select(x =>
+				new Regex(x, RegexOptions.IgnoreCase)).ToArray();
+			} catch (ArgumentException) {
+				this.selectedRegexs = null;
+			}
+			if (this.selectedRegexs is null) this.UnmarkDocument();
+			else this.MarkDocument();
 		}
 
 		private void AddMatchButton_Click(object sender, RoutedEventArgs e) {
-
+			this.MatchesTextBox.Text = (this.MatchesTextBox.Text + " " + this.selectedText).Trim();
 		}
 	}
 }
