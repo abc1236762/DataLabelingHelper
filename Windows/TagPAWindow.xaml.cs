@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,8 +28,11 @@ namespace DataLabelingHelper
 			public readonly Dictionary<int, string> Options;
 
 			public Item(string[] data) {
-				this.Question = Regex.Replace(data[1],
-					@"^[\w\p{Pd}\s]+\.", "", RegexOptions.ECMAScript).Trim();
+				for (int i = 0; i < data.Length; i++)
+					data[i] = data[i].Normalize(NormalizationForm.FormKC);
+
+				this.Question = Regex.Replace(data[1],@"^[\w\p{Pd}\s]+\.",
+					"", RegexOptions.ECMAScript).Trim();
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
 				this.AnswerID = int.Parse(data[12]);
@@ -104,36 +108,37 @@ namespace DataLabelingHelper
 			var result = MessageBoxResult.None;
 			string message = string.Empty;
 			Item newItem = this.data[this.questionID];
+			var untaggedDocuments = newItem.DocumentNames.ToHashSet();
 			foreach (KeyValuePair<string, Item> pair in this.data) {
 				if (pair.Key == this.questionID) break;
 				Item item = pair.Value;
 				if (Regex.Replace(item.Question, @"[，。？：（）,.?:()\s]", "").ToLower() !=
 					Regex.Replace(newItem.Question, @"[，。？：（）,.?:()\s]", "").ToLower()) continue;
-				this.duplicateQuestionIDs.Add(pair.Key);
-				message += $"Question ID {this.questionID}與{pair.Key}的問題相同，文章";
-				int equalCount = 0;
-				foreach (var name in item.DocumentNames) {
-					if (Array.IndexOf(newItem.DocumentNames, name) < 0) break;
-					equalCount += 1;
+				if (string.IsNullOrEmpty(message)) {
+					message += $"Question ID {this.questionID}：{newItem.Question}";
+					message += $"\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
+					message += newItem.Options.Where(x => x.Key != newItem.AnswerID)
+						.Select(x => x.Value).Aggregate((x, y) => x + "／" + y) + "。";
+					message += $"\n{this.questionID}的文章：";
+					message += newItem.DocumentNames.Aggregate((x, y) => x + "、" + y) + "。\n";
 				}
-				if (equalCount == 0) message += "完全不";
-				else if (equalCount < item.DocumentNames.Length) message += "不完全";
-				message += $"相同。\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
-				message += newItem.Options.Where(x => x.Key != newItem.AnswerID)
-					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y);
+
+				this.duplicateQuestionIDs.Add(pair.Key);
+				message += $"\n與{pair.Key}的問題相同。";
 				message += $"\n{pair.Key}的選項：{item.Options[item.AnswerID]}｜";
 				message += item.Options.Where(x => x.Key != item.AnswerID)
-					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y);
-				if (equalCount != item.DocumentNames.Length) {
-					message += $"\n{this.questionID}的文章：";
-					message += newItem.DocumentNames.Aggregate((x, y) => x + "、" + y);
-					message += $"\n{pair.Key}的文章：";
-					message += item.DocumentNames.Aggregate((x, y) => x + "、" + y);
-				}
-				message += "\n\n";
+					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y) + "。";
+				message += $"\n{pair.Key}的文章：";
+				message += item.DocumentNames.Aggregate((x, y) => x + "、" + y) + "。\n";
+				foreach (var name in item.DocumentNames)
+					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
 			}
 			if (!string.IsNullOrEmpty(message)) {
-				message += "是否跳過？";
+				if (untaggedDocuments.Count > 0) {
+					message += $"\nQuestion ID {this.questionID}還有未標記過的文章：";
+					message += untaggedDocuments.Aggregate((x, y) => x + "、" + y) + "。";
+				} else message += $"\nQuestion ID {this.questionID}已無未標記過的文章。";
+				message += "\n\n是否跳過？";
 				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
 					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
 						MessageBoxImage.Warning, MessageBoxResult.None);
