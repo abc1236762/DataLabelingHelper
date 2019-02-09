@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Xml;
 
@@ -114,31 +115,41 @@ namespace DataLabelingHelper
 				Item item = pair.Value;
 				if (Regex.Replace(item.Question, @"[，。？：（）,.?:()\s]", "").ToLower() !=
 					Regex.Replace(newItem.Question, @"[，。？：（）,.?:()\s]", "").ToLower()) continue;
+				var options = item.Options.Where(x => x.Key != item.AnswerID).Select(x => x.Value);
+				var newOptions = newItem.Options.Where(x => x.Key != newItem.AnswerID).Select(x => x.Value);
 				if (string.IsNullOrEmpty(message)) {
-					message += $"Question ID {this.questionID}：{newItem.Question}";
-					message += $"\n{this.questionID}的選項：{newItem.Options[newItem.AnswerID]}｜";
-					message += newItem.Options.Where(x => x.Key != newItem.AnswerID)
-						.Select(x => x.Value).Aggregate((x, y) => x + "／" + y) + "。";
-					message += $"\n{this.questionID}的文章：";
-					message += newItem.DocumentNames.Aggregate((x, y) => x + "、" + y) + "。\n";
+					message += $"Question ID {this.questionID}「{newItem.Question}」";
+					message += $"\n{this.questionID}的\t選項：答案「{newItem.Options[newItem.AnswerID]}」；其他選項「";
+					message += newOptions.Aggregate((x, y) => x + "／" + y) + "」。";
+					message += $"\n\t文章：";
+					message += newItem.DocumentNames.Aggregate((x, y) => x + "、" + y) +
+						"。\n與以下的Question ID的問題重複！\n";
 				}
 
 				this.duplicateQuestionIDs.Add(pair.Key);
-				message += $"\n與{pair.Key}的問題相同。";
-				message += $"\n{pair.Key}的選項：{item.Options[item.AnswerID]}｜";
-				message += item.Options.Where(x => x.Key != item.AnswerID)
-					.Select(x => x.Value).Aggregate((x, y) => x + "／" + y) + "。";
-				message += $"\n{pair.Key}的文章：";
-				message += item.DocumentNames.Aggregate((x, y) => x + "、" + y) + "。\n";
+				string answer = (item.Options[item.AnswerID] == newItem.Options[newItem.AnswerID]) ?
+					"一致" : $"「{item.Options[item.AnswerID]}」";
+				message += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
+				var excepedOptions = options.Except(newOptions);
+				if (excepedOptions.Count() == 0) message += "完全一致";
+				else {
+					message += $"不一致「{excepedOptions.Aggregate((x, y) => x + "／" + y)}」";
+					if (excepedOptions.Count() < options.Count()) message +=
+							$"、一致「{options.Except(excepedOptions).Aggregate((x, y) => x + "／" + y)}」";
+				}
+				message += $"。\n\t文章：";
+				var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
+				if (excepedDocumentNames.Count() == 0) message += "完全一致。";
+				else message += $"沒有「{excepedDocumentNames.Aggregate((x, y) => x + "、" + y)}」。";
 				foreach (var name in item.DocumentNames)
 					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
 			}
 			if (!string.IsNullOrEmpty(message)) {
 				if (untaggedDocuments.Count > 0) {
-					message += $"\nQuestion ID {this.questionID}還有未標記過的文章：";
-					message += untaggedDocuments.Aggregate((x, y) => x + "、" + y) + "。";
-				} else message += $"\nQuestion ID {this.questionID}已無未標記過的文章。";
-				message += "\n\n是否跳過？";
+					message += $"\n\nQuestion ID {this.questionID}還有未標記過的文章「";
+					message += untaggedDocuments.Aggregate((x, y) => x + "、" + y) + "」，";
+				} else message += $"\n\nQuestion ID {this.questionID}已無未標記過的文章，";
+				message += "是否跳過？";
 				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
 					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
 						MessageBoxImage.Warning, MessageBoxResult.None);
@@ -305,6 +316,7 @@ namespace DataLabelingHelper
 				textBox.Text = option;
 				textBox.SelectionChanged += this.QATextBox_SelectionChanged;
 				textBox.LostFocus += this.QATextBox_LostFocus;
+				textBox.KeyDown += this.QATextBox_KeyDown;
 				this.OptionsWrapPanel.Children.Add(textBox);
 			}
 
@@ -451,6 +463,11 @@ namespace DataLabelingHelper
 
 		private void AddMatchButton_Click(object sender, RoutedEventArgs e) {
 			this.MatchesTextBox.Text = (this.MatchesTextBox.Text + " " + this.selectedText).Trim();
+		}
+
+		private void QATextBox_KeyDown(object sender, KeyEventArgs e) {
+			if (e.Key == Key.Enter || e.Key == Key.Space)
+				this.MatchesTextBox.Text = (this.MatchesTextBox.Text + " " + this.selectedText).Trim();
 		}
 	}
 }

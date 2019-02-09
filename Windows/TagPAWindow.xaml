@@ -102,7 +102,7 @@
 			<TextBox 
 				x:Name="QuestionTextBox" Grid.Row="0" TextWrapping="Wrap" IsReadOnly="True"
 				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-				FontSize="{Binding Text, ElementName=FontSizeTextBox}"
+				FontSize="{Binding Text, ElementName=FontSizeTextBox}" KeyDown="QATextBox_KeyDown"
 				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 			<Grid Grid.Row="2">
 				<Grid.ColumnDefinitions>
@@ -113,7 +113,7 @@
 				<TextBox 
 					x:Name="AnswerTextBox" TextWrapping="Wrap" IsReadOnly="True" Grid.Column="0"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-					FontSize="{Binding Text, ElementName=FontSizeTextBox}"
+					FontSize="{Binding Text, ElementName=FontSizeTextBox}" KeyDown="QATextBox_KeyDown"
 					SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 				<WrapPanel x:Name="OptionsWrapPanel" Grid.Column="2" Orientation="Horizontal"/>
 			</Grid>
