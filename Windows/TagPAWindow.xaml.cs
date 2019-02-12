@@ -32,7 +32,7 @@ namespace DataLabelingHelper
 				for (int i = 0; i < data.Length; i++)
 					data[i] = data[i].Normalize(NormalizationForm.FormKC);
 
-				this.Question = Regex.Replace(data[1],@"^[\w\p{Pd}\s]+\.",
+				this.Question = Regex.Replace(data[1], @"^[\w\p{Pd}\s]+\.",
 					"", RegexOptions.ECMAScript).Trim();
 				this.DocumentNames = new string[10];
 				Array.ConstrainedCopy(data, 2, this.DocumentNames, 0, 10);
@@ -45,8 +45,16 @@ namespace DataLabelingHelper
 			}
 		}
 
+		private static Configuration configuration = 
+			ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+		private static KeyValueConfigurationCollection settings = 
+			configuration.AppSettings.Settings;
+		private static char[] invalidPathChars =
+			Path.GetInvalidPathChars().Where(x => x != '/' && x != '\\').ToArray();
 		private string dataFile;
 		private string questionID;
+		private string resultFile;
+		private string resultFilePath;
 		private Dictionary<string, Item> data;
 		private List<string> duplicateQuestionIDs = new List<string>();
 		private DocumentItem focusedDocumentItem = null;
@@ -75,20 +83,23 @@ namespace DataLabelingHelper
 				}
 				this.GetSelectedFile();
 			}
+
+			if (string.IsNullOrEmpty(settings["TagPA.ResultFile"].Value))
+				this.PathTextBox.Text = DateTime.UtcNow.ToString("yyyy-MM-dd");
+			else
+				this.PathTextBox.Text = settings["TagPA.ResultFile"].Value;
 		}
 
 		private void SaveSettings() {
-			var ConfigFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-			var Settings = ConfigFile.AppSettings.Settings;
-			if (Settings["TagPA.DataFile"] == null) Settings.Add("TagPA.DataFile", this.dataFile);
-			else Settings["TagPA.DataFile"].Value = this.dataFile;
-			if (Settings["TagPA.QuestionID"] == null) Settings.Add("TagPA.QuestionID", this.questionID);
-			else Settings["TagPA.QuestionID"].Value = this.questionID;
-			ConfigFile.Save(ConfigurationSaveMode.Modified);
+			if (settings["TagPA.DataFile"] is null) settings.Add("TagPA.DataFile", this.dataFile);
+			else settings["TagPA.DataFile"].Value = this.dataFile;
+			if (settings["TagPA.QuestionID"] is null) settings.Add("TagPA.QuestionID", this.questionID);
+			else settings["TagPA.QuestionID"].Value = this.questionID;
+			configuration.Save(ConfigurationSaveMode.Modified);
 		}
 
 		private void GetSelectedFile() {
-			this.dataFile = ConfigurationManager.AppSettings["TagPA.DataFile"] ?? this.dataFile;
+			this.dataFile = settings["TagPA.DataFile"].Value ?? this.dataFile;
 			if (this.InputComboBox.Items.Count > 0) {
 				this.InputComboBox.IsEnabled = true;
 				if (this.dataFile == string.Empty) {
@@ -178,19 +189,20 @@ namespace DataLabelingHelper
 
 		private void InputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
 			this.dataFile = this.InputComboBox.SelectedItem as string;
-			this.SaveSettings();
 			this.ParseData();
 			this.CurrentComboBox.Items.Clear();
 			foreach (var key in this.data.Keys) this.CurrentComboBox.Items.Add(key);
 			this.GetQuestion();
+			this.SaveSettings();
 		}
 
 		private void GetQuestion() {
-			this.questionID = ConfigurationManager.AppSettings["TagPA.QuestionID"] ?? this.questionID;
+			this.questionID = settings["TagPA.QuestionID"].Value ?? this.questionID;
 			if (this.CurrentComboBox.Items.Count > 0) {
 				this.CurrentComboBox.IsEnabled = true;
-				if (this.questionID == string.Empty) {
+				if (string.IsNullOrEmpty(this.questionID)) {
 					this.CurrentComboBox.SelectedIndex = 0;
+					this.questionID = this.CurrentComboBox.Items[0] as string;
 				} else {
 					var list = this.CurrentComboBox.Items.Cast<string>().Where(Item => Item == this.questionID);
 					if (list.Count() != 1) this.CurrentComboBox.SelectedIndex = -1;
@@ -306,6 +318,8 @@ namespace DataLabelingHelper
 				this.NextButton.IsEnabled = false;
 			}
 
+			this.ProcessTextBlock.Text = 
+				$"{(this.CurrentComboBox.SelectedIndex + 1) * 100D / this.CurrentComboBox.Items.Count:F2}%";
 			this.QuestionTextBox.Text = this.data[this.questionID].Question;
 			this.AnswerTextBox.Text = this.data[this.questionID].Options[this.data[this.questionID].AnswerID];
 			this.OptionsWrapPanel.Children.Clear();
@@ -316,7 +330,7 @@ namespace DataLabelingHelper
 				textBox.Text = option;
 				textBox.SelectionChanged += this.QATextBox_SelectionChanged;
 				textBox.LostFocus += this.QATextBox_LostFocus;
-				textBox.KeyDown += this.QATextBox_KeyDown;
+				textBox.PreviewKeyDown += this.QATextBox_PreviewKeyDown;
 				this.OptionsWrapPanel.Children.Add(textBox);
 			}
 
@@ -359,18 +373,15 @@ namespace DataLabelingHelper
 
 		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
 			if (this.ContextWrapPanel is null) return;
-			foreach (var child in this.OptionsWrapPanel.Children) {
-				TextBox textBox = child as TextBox;
-				double fontSize = textBox.FontSize;
-				try { fontSize = double.Parse(this.FontSizeTextBox.Text); } catch { }
-				textBox.FontSize = fontSize;
-			}
-			foreach (var child in this.ContextWrapPanel.Children) {
-				DocumentItem documentItem = child as DocumentItem;
-				double fontSize = documentItem.ContextFlowDocument.FontSize;
-				try { fontSize = double.Parse(this.FontSizeTextBox.Text) / 3D * 2D; } catch { }
-				documentItem.ContextFlowDocument.FontSize = fontSize;
-				documentItem.AdjustWidth();
+			if (double.TryParse(this.FontSizeTextBox.Text, out double newFontSize)) {
+				foreach (var child in this.OptionsWrapPanel.Children)
+					(child as TextBox).FontSize = newFontSize;
+				foreach (var child in this.ContextWrapPanel.Children) {
+					DocumentItem documentItem = child as DocumentItem;
+					documentItem.ContextFlowDocument.FontSize = newFontSize / 3D * 2D;
+					documentItem.AdjustWidth();
+				}
+				this.AddMatchButton.FontSize = this.MatchesTextBox.FontSize = newFontSize / 3D * 2D;
 			}
 		}
 
@@ -409,19 +420,21 @@ namespace DataLabelingHelper
 		}
 
 		private void SaveFile(string line) {
-			string filename = DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv";
-			string filePath = $@"work\tagpa\{filename}";
 			if (!Directory.Exists(@"work\tagpa\"))
 				Directory.CreateDirectory(@"work\tagpa\");
 			List<string> lines = new List<string>();
-			if (!File.Exists(filePath))
+			if (!File.Exists(this.resultFilePath)) {
+				if (!Directory.GetParent(this.resultFilePath).Exists)
+					Directory.CreateDirectory(Directory.GetParent(this.resultFilePath).FullName);
 				lines.Add("Dataset,QuestionID,Result");
+			}
 			lines.Add(line);
-			File.AppendAllLines(filePath, lines);
+			File.AppendAllLines(this.resultFilePath, lines);
 			this.CurrentComboBox.SelectedIndex =
 				this.CurrentComboBox.SelectedIndex <
 				this.CurrentComboBox.Items.Count - 1 ?
 				this.CurrentComboBox.SelectedIndex + 1 : -1;
+			this.UpdateResultCount();
 		}
 
 		private void SaveButton_Click(object sender, RoutedEventArgs e) {
@@ -465,9 +478,41 @@ namespace DataLabelingHelper
 			this.MatchesTextBox.Text = (this.MatchesTextBox.Text + " " + this.selectedText).Trim();
 		}
 
-		private void QATextBox_KeyDown(object sender, KeyEventArgs e) {
+		private void QATextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Enter || e.Key == Key.Space)
 				this.MatchesTextBox.Text = (this.MatchesTextBox.Text + " " + this.selectedText).Trim();
+		}
+
+		private void UpdateResultCount() {
+			if (File.Exists(this.resultFilePath)) {
+				VBFileIO.TextFieldParser parser = new VBFileIO.TextFieldParser(this.resultFilePath) {
+					TextFieldType = VBFileIO.FieldType.Delimited,
+				};
+				parser.SetDelimiters(",");
+				parser.ReadFields();
+				int count = 0;
+				while (!parser.EndOfData) {
+					parser.ReadFields();
+					count += 1;
+				}
+				this.CountTextBlock.Text = $": {count}";
+			} else this.CountTextBlock.Text = ": 0";
+		}
+
+		private void PathTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+			this.resultFile = string.Join("\\", this.PathTextBox.Text.Split(
+				new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+			if (this.resultFile == string.Empty) {
+				this.CountTextBlock.Text = ": 0";
+				this.SaveButton.IsEnabled = false;
+				return;
+			} else this.SaveButton.IsEnabled = this.CurrentComboBox.SelectedIndex >= 0;
+			this.resultFile = string.Join("_", this.PathTextBox.Text.Split(invalidPathChars));
+			if (settings["TagPA.ResultFile"] is null) settings.Add("TagPA.ResultFile", this.resultFile);
+			else settings["TagPA.ResultFile"].Value = this.resultFile;
+			configuration.Save(ConfigurationSaveMode.Modified);
+			this.resultFilePath = Path.Combine(@"work\tagpa\", this.resultFile + ".csv");
+			this.UpdateResultCount();
 		}
 	}
 }

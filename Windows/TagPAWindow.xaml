@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d"
-	Title="TagPAWindow" Width="960" Height="540" MinWidth="640" MinHeight="480"
+	Title="TagPAWindow" Width="960" Height="540" MinWidth="640" MinHeight="480" WindowState="Maximized"
 	Background="#9F1E1E1E" Foreground="#FFDCDCDC" WindowStartupLocation="CenterScreen">
 	<Grid>
 		<Grid.RowDefinitions>
@@ -46,16 +46,20 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="5"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
+				<TextBlock 
+					x:Name="ProcessTextBlock" Grid.Column="0" Text="0%" VerticalAlignment="Center"/>
 				<Button
-					x:Name="PreviousButton" Grid.Column="0" Content="上一筆" IsEnabled="False" 
+					x:Name="PreviousButton" Grid.Column="2" Content="上一筆" IsEnabled="False" 
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
 					Click="PreviousButton_Click"/>
 				<ComboBox
-					x:Name="CurrentComboBox" Grid.Column="2" IsEnabled="False"
+					x:Name="CurrentComboBox" Grid.Column="4" IsEnabled="False"
 					SelectionChanged="CurrentComboBox_SelectionChanged"/>
 				<Button
-					x:Name="NextButton" Grid.Column="4" Content="下一筆" IsEnabled="False"
+					x:Name="NextButton" Grid.Column="6" Content="下一筆" IsEnabled="False"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
 					Click="NextButton_Click"/>
 			</Grid>
@@ -72,19 +76,32 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="5"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<TextBlock Grid.Column="4" Text="大小" VerticalAlignment="Center"/>
+				<TextBlock Grid.Column="4" Text="字體大小" VerticalAlignment="Center"/>
 				<TextBox
 					x:Name="FontSizeTextBox" Grid.Column="6" Text="24"
 					VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
 					TextChanged="FontSizeTextBox_TextChanged"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
+				<TextBlock Grid.Column="8" Text="結果路徑" VerticalAlignment="Center"/>
+				<TextBox
+					x:Name="PathTextBox" Grid.Column="10" TextChanged="PathTextBox_TextChanged"
+					VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
+				<TextBlock 
+					x:Name="CountTextBlock" Grid.Column="12" Text=": 0" VerticalAlignment="Center"/>
 				<Button
-					x:Name="ModeButton" Grid.Column="8" Content="標　　　　記" IsEnabled="False"
+					x:Name="ModeButton" Grid.Column="14" Content="標　　　　記" IsEnabled="False"
 					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
 					Click="ModeButton_Click"/>
 				<Button
-					x:Name="SaveButton" Grid.Column="10" Content="儲存" IsEnabled="False"
+					x:Name="SaveButton" Grid.Column="16" Content="儲存" IsEnabled="False"
 					Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" Foreground="#FFDCDCDC"
 					Click="SaveButton_Click"/>
 			</Grid>
@@ -102,7 +119,7 @@
 			<TextBox 
 				x:Name="QuestionTextBox" Grid.Row="0" TextWrapping="Wrap" IsReadOnly="True"
 				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-				FontSize="{Binding Text, ElementName=FontSizeTextBox}" KeyDown="QATextBox_KeyDown"
+				FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QATextBox_PreviewKeyDown"
 				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 			<Grid Grid.Row="2">
 				<Grid.ColumnDefinitions>
@@ -113,7 +130,7 @@
 				<TextBox 
 					x:Name="AnswerTextBox" TextWrapping="Wrap" IsReadOnly="True" Grid.Column="0"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-					FontSize="{Binding Text, ElementName=FontSizeTextBox}" KeyDown="QATextBox_KeyDown"
+					FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QATextBox_PreviewKeyDown"
 					SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 				<WrapPanel x:Name="OptionsWrapPanel" Grid.Column="2" Orientation="Horizontal"/>
 			</Grid>
@@ -124,11 +141,11 @@
 					<ColumnDefinition Width="*"/>
 				</Grid.ColumnDefinitions>
 				<Button
-					x:Name="AddMatchButton" Content="加入匹配" FontSize="16" Grid.Column="0"
+					x:Name="AddMatchButton" Content="加入匹配" FontSize="18" Grid.Column="0"
 					Foreground="#FFDCDCDC" Background="#7F1E1E1E" BorderBrush="#FF9B9B9B"
 					Click="AddMatchButton_Click" FocusManager.IsFocusScope="True"/>
 				<TextBox 
-					x:Name="MatchesTextBox" TextWrapping="Wrap" FontSize="16" Grid.Column="2"
+					x:Name="MatchesTextBox" TextWrapping="Wrap" FontSize="18" Grid.Column="2"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
 					TextChanged="MatchesTextBox_TextChanged" FocusManager.IsFocusScope="True"/>
 			</Grid>
