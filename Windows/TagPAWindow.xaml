@@ -114,6 +114,8 @@
 				<RowDefinition Height="5"/>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="10"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="10"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
 			<TextBox 
@@ -154,6 +156,10 @@
 				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" />
 			</ScrollViewer>
+			<TextBox
+				x:Name="NotesTextBox" FontFamily="Inziu IosevkaCC TC" FontSize="18" Grid.Row="8"
+				TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" TextChanged="NotesTextBox_TextChanged"
+				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
 		</Grid>
 	</Grid>
 </Window>

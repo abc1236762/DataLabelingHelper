@@ -88,6 +88,12 @@ namespace DataLabelingHelper
 				this.PathTextBox.Text = DateTime.UtcNow.ToString("yyyy-MM-dd");
 			else
 				this.PathTextBox.Text = settings["TagPA.ResultFile"].Value;
+			try {
+				this.NotesTextBox.Text = File.ReadAllText(@"work\tagpa\Notes.txt", Encoding.UTF8);
+			} catch (Exception e) {
+				if (e is DirectoryNotFoundException) Directory.CreateDirectory(@"work\tagpa");
+				else if (!(e is FileNotFoundException)) throw e;
+			}
 		}
 
 		private void SaveSettings() {
@@ -381,7 +387,8 @@ namespace DataLabelingHelper
 					documentItem.ContextFlowDocument.FontSize = newFontSize / 3D * 2D;
 					documentItem.AdjustWidth();
 				}
-				this.AddMatchButton.FontSize = this.MatchesTextBox.FontSize = newFontSize / 3D * 2D;
+				this.NotesTextBox.FontSize = this.AddMatchButton.FontSize =
+					this.MatchesTextBox.FontSize = newFontSize / 3D * 2D;
 			}
 		}
 
@@ -514,5 +521,9 @@ namespace DataLabelingHelper
 			this.resultFilePath = Path.Combine(@"work\tagpa\", this.resultFile + ".csv");
 			this.UpdateResultCount();
 		}
+
+		private void NotesTextBox_TextChanged(object sender, TextChangedEventArgs e) =>
+			File.WriteAllBytes(@"work\tagpa\Notes.txt", Encoding.UTF8.GetBytes(
+				this.NotesTextBox.Text.Replace("\r\n", "\n").Replace("\r", "\n")));
 	}
 }
