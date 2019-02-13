@@ -51,6 +51,7 @@ namespace DataLabelingHelper
 			configuration.AppSettings.Settings;
 		private static char[] invalidPathChars =
 			Path.GetInvalidPathChars().Where(x => x != '/' && x != '\\').ToArray();
+		private (int, bool) notesTextBoxCaretJudge;
 		private string dataFile;
 		private string questionID;
 		private string resultFile;
@@ -525,5 +526,18 @@ namespace DataLabelingHelper
 		private void NotesTextBox_TextChanged(object sender, TextChangedEventArgs e) =>
 			File.WriteAllBytes(@"work\tagpa\Notes.txt", Encoding.UTF8.GetBytes(
 				this.NotesTextBox.Text.Replace("\r\n", "\n").Replace("\r", "\n")));
+
+		private void NotesTextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
+			if (e.Key == Key.Up) this.notesTextBoxCaretJudge = (this.NotesTextBox.CaretIndex, true);
+			else if (e.Key == Key.Down) this.notesTextBoxCaretJudge = (this.NotesTextBox.CaretIndex, false);
+		}
+
+		private void NotesTextBox_KeyUp(object sender, KeyEventArgs e) {
+			if (this.notesTextBoxCaretJudge.Item1 == this.NotesTextBox.CaretIndex) {
+				if (this.notesTextBoxCaretJudge.Item2) this.NotesTextBox.CaretIndex = 0;
+				else this.NotesTextBox.CaretIndex = this.NotesTextBox.Text.Length;
+			}
+		}
+
 	}
 }

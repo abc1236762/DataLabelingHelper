@@ -159,7 +159,7 @@
 			<TextBox
 				x:Name="NotesTextBox" FontFamily="Inziu IosevkaCC TC" FontSize="18" Grid.Row="8"
 				TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" TextChanged="NotesTextBox_TextChanged"
-				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
+				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" KeyUp="NotesTextBox_KeyUp" PreviewKeyDown="NotesTextBox_PreviewKeyDown"/>
 		</Grid>
 	</Grid>
 </Window>
