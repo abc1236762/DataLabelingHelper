@@ -48,8 +48,9 @@
 				<FlowDocument.Resources>
 					<Style TargetType="{x:Type Paragraph}">
 						<Setter Property="Margin" Value="0"/>
-						<Setter Property="FontSize" Value="{Binding FontSize,
-							ElementName=ContextFlowDocument}"/>
+						<Setter
+							Property="FontSize"
+							Value="{Binding FontSize, ElementName=ContextFlowDocument}"/>
 					</Style>
 				</FlowDocument.Resources>
 			</FlowDocument>

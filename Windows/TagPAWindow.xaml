@@ -52,12 +52,12 @@
 				<TextBlock 
 					x:Name="ProcessTextBlock" Grid.Column="0" Text="0%" VerticalAlignment="Center"/>
 				<Button
-					x:Name="PreviousButton" Grid.Column="2" Content="上一筆" IsEnabled="False" 
+					x:Name="PreviousButton" Grid.Column="2" Content="上一筆" IsEnabled="False"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
 					Click="PreviousButton_Click"/>
 				<ComboBox
 					x:Name="CurrentComboBox" Grid.Column="4" IsEnabled="False"
-					SelectionChanged="CurrentComboBox_SelectionChanged"/>
+					SelectionChanged="CurrentComboBox_SelectionChanged" IsEditable="True"/>
 				<Button
 					x:Name="NextButton" Grid.Column="6" Content="下一筆" IsEnabled="False"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
@@ -114,14 +114,15 @@
 				<RowDefinition Height="5"/>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="10"/>
-				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="5*"/>
 				<RowDefinition Height="10"/>
-				<RowDefinition Height="*"/>
+				<RowDefinition Height="2*"/>
 			</Grid.RowDefinitions>
 			<TextBox 
-				x:Name="QuestionTextBox" Grid.Row="0" TextWrapping="Wrap" IsReadOnly="True"
+				x:Name="QuestionTextBox" Grid.Row="0" TextWrapping="Wrap"
 				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-				FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QATextBox_PreviewKeyDown"
+				FontSize="{Binding Text, ElementName=FontSizeTextBox}" IsReadOnly="True"
+				FocusManager.IsFocusScope="True" PreviewKeyDown="QATextBox_PreviewKeyDown"
 				SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 			<Grid Grid.Row="2">
 				<Grid.ColumnDefinitions>
@@ -130,9 +131,10 @@
 					<ColumnDefinition Width="3*"/>
 				</Grid.ColumnDefinitions>
 				<TextBox 
-					x:Name="AnswerTextBox" TextWrapping="Wrap" IsReadOnly="True" Grid.Column="0"
+					x:Name="AnswerTextBox" TextWrapping="Wrap" Grid.Column="0"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
-					FontSize="{Binding Text, ElementName=FontSizeTextBox}" PreviewKeyDown="QATextBox_PreviewKeyDown"
+					FontSize="{Binding Text, ElementName=FontSizeTextBox}" IsReadOnly="True"
+					FocusManager.IsFocusScope="True" PreviewKeyDown="QATextBox_PreviewKeyDown"
 					SelectionChanged="QATextBox_SelectionChanged" LostFocus="QATextBox_LostFocus"/>
 				<WrapPanel x:Name="OptionsWrapPanel" Grid.Column="2" Orientation="Horizontal"/>
 			</Grid>
@@ -152,14 +154,17 @@
 					TextChanged="MatchesTextBox_TextChanged" FocusManager.IsFocusScope="True"/>
 			</Grid>
 			<ScrollViewer
-				x:Name="ContextScrollViewer" Grid.Row="6" FocusManager.IsFocusScope="True"
-				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal" />
+				x:Name="ContextScrollViewer" Grid.Row="6"
+				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+				PreviewMouseWheel="ContextScrollViewer_PreviewMouseWheel">
+				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal"/>
 			</ScrollViewer>
 			<TextBox
-				x:Name="NotesTextBox" FontFamily="Inziu IosevkaCC TC" FontSize="18" Grid.Row="8"
-				TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" TextChanged="NotesTextBox_TextChanged"
-				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B" KeyUp="NotesTextBox_KeyUp" PreviewKeyDown="NotesTextBox_PreviewKeyDown"/>
+				x:Name="NotesTextBox" FontFamily="Inziu IosevkaCC TC" Grid.Row="8"
+				TextWrapping="Wrap" FontSize="18" AcceptsReturn="True" AcceptsTab="True"
+				Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
+				VerticalScrollBarVisibility="Auto" TextChanged="NotesTextBox_TextChanged"
+				PreviewKeyDown="NotesTextBox_PreviewKeyDown" KeyUp="NotesTextBox_KeyUp"/>
 		</Grid>
 	</Grid>
 </Window>

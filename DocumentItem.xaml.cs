@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,7 +32,7 @@ namespace DataLabelingHelper
 		public DocumentItem() => this.InitializeComponent();
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e) {
-			UpdateLineRunText();
+			this.UpdateLineRunText();
 			this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
 			this.formattedText = new FormattedText(this.Context,
 				CultureInfo.CurrentCulture,
@@ -67,7 +68,7 @@ namespace DataLabelingHelper
 
 		public void UpdateLineRunText() {
 			this.Lines.Sort();
-			this.LineRun.Text = this.Lines.Select(x => x.ToString("D2")).Aggregate((x, y) => x + "、" + y);
+			this.LineRun.Text = String.Join("、", this.Lines.Select(x => x.ToString("D2")));
 		}
 
 		private void ScToTcButton_Click(object sender, RoutedEventArgs e) {
@@ -87,12 +88,13 @@ namespace DataLabelingHelper
 				this.ContextFlowDocument.Blocks.Add(new Paragraph(new Run(this.Context)));
 			}
 			this.ScToTcButton.IsEnabled = false;
+			this.ContextRichTextBox.Focus();
 		}
 
 		private void MergeButton_Click(object sender, RoutedEventArgs e) {
 			string input = Interaction.InputBox("要併入第幾篇文章？", "合併文章").Trim();
-			if (input == string.Empty) return;
-			if (int.TryParse(input, out int id) && (id >= 1 && id <= 10 && this.Lines.IndexOf(id) < 0)) {
+			if (input == String.Empty) return;
+			if (Int32.TryParse(input, out int id) && (id >= 1 && id <= 10 && this.Lines.IndexOf(id) < 0)) {
 				var children = TagPA.ContextWrapPanel.Children;
 				DocumentItem item = children.Cast<DocumentItem>().Where(x => x.Lines.IndexOf(id) >= 0).First();
 				string context1 = Regex.Replace(this.Context, @"[，。？：（）,.?:()\s]", "").ToLower();
@@ -105,12 +107,12 @@ namespace DataLabelingHelper
 
 				if (deleted.Count() > 0) {
 					if (deleted.Count() <= 30) {
-						message += $"\n移除字元：{deleted.Select(x => x.Obj1.ToString()).Aggregate((x, y) => x + "、" + y)}。";
+						message += $"\n移除字元：「{String.Join("」、「", deleted.Select(x => x.Obj1.ToString()))}」。";
 					} else message += $"\n移除字元：（因超過30個不顯示）";
 				}
 				if (inserted.Count() > 0) {
 					if (inserted.Count() <= 30) {
-						message += $"\n插入字元：{inserted.Select(x => x.Obj2.ToString()).Aggregate((x, y) => x + "、" + y)}。";
+						message += $"\n插入字元：「{String.Join("」、「", inserted.Select(x => x.Obj2.ToString()))}」。";
 					} else message += $"\n插入字元：（因超過30個不顯示）";
 				}
 				message += "\n\n是否合併？";
