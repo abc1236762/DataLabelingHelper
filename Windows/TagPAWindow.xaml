@@ -154,11 +154,12 @@
 					TextChanged="MatchesTextBox_TextChanged" FocusManager.IsFocusScope="True"/>
 			</Grid>
 			<ScrollViewer
-				x:Name="ContextScrollViewer" Grid.Row="6"
+				x:Name="ContextScrollViewer" Grid.Row="6" PanningMode="Both"
 				HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
 				PreviewMouseWheel="ContextScrollViewer_PreviewMouseWheel">
 				<WrapPanel x:Name="ContextWrapPanel" Orientation="Horizontal"/>
 			</ScrollViewer>
+			<GridSplitter Grid.Row="7" Height="2" HorizontalAlignment="Stretch"/>
 			<TextBox
 				x:Name="NotesTextBox" FontFamily="Inziu IosevkaCC TC" Grid.Row="8"
 				TextWrapping="Wrap" FontSize="18" AcceptsReturn="True" AcceptsTab="True"
