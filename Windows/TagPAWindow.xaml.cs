@@ -194,7 +194,7 @@ namespace DataLabelingHelper
 			while (!parser.EndOfData) {
 				string[] row = parser.ReadFields();
 				string line = String.Join(",", row.Skip(1));
-				this.data.Add(row[0], new Item(row, lines.ContainsValue(line)));
+				this.data.Add(row[0], new Item(row.Clone() as string[], lines.ContainsValue(line)));
 				lines.Add(row[0], String.Join(",", row.Skip(1)));
 			}
 		}
