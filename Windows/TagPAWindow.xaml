@@ -87,7 +87,7 @@
 				<TextBox
 					x:Name="FontSizeTextBox" Grid.Column="6" Text="24"
 					VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-					TextChanged="FontSizeTextBox_TextChanged"
+					TextChanged="FontSizeTextBox_TextChanged" InputMethod.IsInputMethodEnabled="False"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"/>
 				<TextBlock Grid.Column="8" Text="結果路徑" VerticalAlignment="Center"/>
 				<TextBox

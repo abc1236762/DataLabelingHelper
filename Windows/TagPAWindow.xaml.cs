@@ -72,6 +72,7 @@ namespace DataLabelingHelper
 			{"問題無法辨識", "QuestionIsUnrecognizable" },
 			{"答案可能錯誤", "AnswerIsProbablyWrong" },
 		};
+		private double fontSize = 24D;
 
 		public TagPAWindow() {
 			this.InitializeComponent();
@@ -390,6 +391,7 @@ namespace DataLabelingHelper
 					};
 					documentItem.GotFocus += this.ContextDocumentItem_GotFocus;
 					documentItem.LostFocus += this.ContextDocumentItem_LostFocus;
+					documentItem.ContextFlowDocument.FontSize = this.fontSize / 3D * 2D;
 					this.ContextWrapPanel.Children.Add(documentItem);
 				} else {
 					documentItem.Lines.Add(i);
@@ -407,6 +409,7 @@ namespace DataLabelingHelper
 		private void FontSizeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
 			if (this.ContextWrapPanel is null) return;
 			if (Double.TryParse(this.FontSizeTextBox.Text, out double newFontSize)) {
+				this.fontSize = newFontSize;
 				foreach (var child in this.OptionsWrapPanel.Children)
 					(child as TextBox).FontSize = newFontSize;
 				foreach (var child in this.ContextWrapPanel.Children) {
