@@ -48,6 +48,8 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="5"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="5"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
 				<TextBlock 
 					x:Name="ProcessTextBlock" Grid.Column="0" Text="0%" VerticalAlignment="Center"/>
@@ -62,6 +64,11 @@
 					x:Name="NextButton" Grid.Column="6" Content="下一筆" IsEnabled="False"
 					Foreground="#FFDCDCDC" Background="#9F1E1E1E" BorderBrush="#FF9B9B9B"
 					Click="NextButton_Click"/>
+				<TextBlock Grid.Column="8" VerticalAlignment="Center">
+					<Run x:Name="NumberRun" Text="0"/>
+					<Run Text="/"/>
+					<Run x:Name="TotalRun" Text="0"/>
+				</TextBlock>
 			</Grid>
 			<Grid Grid.Column="4">
 				<Grid.ColumnDefinitions>

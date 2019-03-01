@@ -201,11 +201,13 @@ namespace DataLabelingHelper
 		}
 
 		private void InputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			this.TotalRun.Text = "0";
 			this.dataFile = this.InputComboBox.SelectedItem as string;
 			this.ParseData();
 			this.CurrentComboBox.Items.Clear();
 			foreach (var pair in this.data)
 				if (!pair.Value.IsDuplicate) this.CurrentComboBox.Items.Add(pair.Key);
+			this.TotalRun.Text = this.CurrentComboBox.Items.Count.ToString();
 			this.GetQuestion();
 			this.SaveSettings();
 		}
@@ -300,6 +302,7 @@ namespace DataLabelingHelper
 			this.CurrentComboBox.SelectedIndex += 1;
 
 		private void CurrentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			this.NumberRun.Text = "0";
 			if (this.CurrentComboBox.Items.Count == 0) {
 				this.CurrentComboBox.IsEnabled = false;
 				this.PreviousButton.IsEnabled = false;
@@ -312,6 +315,7 @@ namespace DataLabelingHelper
 			this.SaveSettings();
 			if (this.IsDataItemDuplicate()) this.CurrentComboBox.SelectedIndex += 1;
 
+			this.NumberRun.Text = (this.CurrentComboBox.SelectedIndex + 1).ToString();
 			this.QuestionTextBox.Text = String.Empty;
 			this.AnswerTextBox.Text = String.Empty;
 			this.ContextWrapPanel.Children.Clear();
