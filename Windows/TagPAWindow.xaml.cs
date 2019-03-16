@@ -133,6 +133,7 @@ namespace DataLabelingHelper
 			string message = String.Empty;
 			Item newItem = this.data[this.questionID];
 			var untaggedDocuments = newItem.DocumentNames.ToHashSet();
+			bool isTotallySame = false;
 			foreach (KeyValuePair<string, Item> pair in this.data) {
 				if (pair.Key == this.questionID) break;
 				Item item = pair.Value;
@@ -142,9 +143,10 @@ namespace DataLabelingHelper
 					.Select(x => Regex.Replace(x.Value, @"^\s*\(\S\)\s*", ""));
 				var newOptions = newItem.Options.Where(x => x.Key != newItem.AnswerID)
 					.Select(x => Regex.Replace(x.Value, @"^\s*\(\S\)\s*", ""));
+				string newAnswer = Regex.Replace(newItem.Options[newItem.AnswerID], @"^\s*\(\S\)\s*", "");
 				if (String.IsNullOrEmpty(message)) {
 					message += $"Question ID {this.questionID}「{newItem.Question}」";
-					message += $"\n{this.questionID}的\t選項：答案「{newItem.Options[newItem.AnswerID]}」；其他選項「";
+					message += $"\n{this.questionID}的\t選項：答案「{newAnswer}」；其他選項「";
 					message += String.Join("／", newOptions) + "」。";
 					message += $"\n\t文章：";
 					message += String.Join("、", newItem.DocumentNames) +
@@ -153,15 +155,14 @@ namespace DataLabelingHelper
 
 				this.duplicateQuestionIDs.Add(pair.Key);
 				string answer = Regex.Replace(item.Options[item.AnswerID], @"^\s*\(\S\)\s*", "");
-				answer = answer == Regex.Replace(newItem.Options[newItem.AnswerID], @"^\s*\(\S\)\s*", "") ?
-					"一致" : $"「{answer}」";
+				answer = answer == newAnswer ? "一致" : $"「{answer}」";
 				message += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
 				var excepedOptions = options.Except(newOptions);
 				if (excepedOptions.Count() == 0) message += "完全一致";
 				else {
 					message += $"不一致「{String.Join("／", excepedOptions)}」";
-					if (excepedOptions.Count() < options.Count()) message +=
-							$"、一致「{String.Join("／", options.Except(excepedOptions))}」";
+					var sameOptions = options.Except(excepedOptions);
+					if (sameOptions.Count() > 0) message += $"、一致「{String.Join("／", sameOptions)}」";
 				}
 				message += $"。\n\t文章：";
 				var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
@@ -169,12 +170,14 @@ namespace DataLabelingHelper
 				else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
 				foreach (var name in item.DocumentNames)
 					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
+				if (answer == "一致" && excepedDocumentNames.Count() == 0) isTotallySame = true;
 			}
 			if (!String.IsNullOrEmpty(message)) {
 				if (untaggedDocuments.Count > 0) {
 					message += $"\n\nQuestion ID {this.questionID}還有未標記過的文章「";
 					message += String.Join("、", untaggedDocuments) + "」，";
 				} else message += $"\n\nQuestion ID {this.questionID}已無未標記過的文章，";
+				if (isTotallySame) message += "有所有選項完全一致的項目，";
 				message += "是否跳過？";
 				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
 					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
@@ -313,9 +316,9 @@ namespace DataLabelingHelper
 			this.questionID = this.CurrentComboBox.SelectedItem as string;
 			if (this.questionID is null) return;
 			this.SaveSettings();
+			this.NumberRun.Text = (this.CurrentComboBox.SelectedIndex + 1).ToString();
 			if (this.IsDataItemDuplicate()) this.CurrentComboBox.SelectedIndex += 1;
 
-			this.NumberRun.Text = (this.CurrentComboBox.SelectedIndex + 1).ToString();
 			this.QuestionTextBox.Text = String.Empty;
 			this.AnswerTextBox.Text = String.Empty;
 			this.ContextWrapPanel.Children.Clear();
