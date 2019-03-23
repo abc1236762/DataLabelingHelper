@@ -170,7 +170,7 @@ namespace DataLabelingHelper
 				else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
 				foreach (var name in item.DocumentNames)
 					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
-				if (answer == "一致" && excepedDocumentNames.Count() == 0) isTotallySame = true;
+				if (answer == "一致" && excepedOptions.Count() == 0) isTotallySame = true;
 			}
 			if (!String.IsNullOrEmpty(message)) {
 				if (untaggedDocuments.Count > 0) {
