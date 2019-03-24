@@ -372,7 +372,7 @@ namespace DataLabelingHelper
 					var inserted = diff.Where(x => x.Status == DiffStatus.Inserted);
 					var deleted = diff.Where(x => x.Status == DiffStatus.Deleted);
 					if (context1 == context2 || (inserted.Count() <= 10 && deleted.Count() <= 10)) {
-						if (context1 != context2) {
+						if (context1 != context2 && (inserted.Count() > 2 || deleted.Count() > 2)) {
 							item.UpdateLineRunText();
 							string message = $"第{i:D2}篇文章與第{item.LineRun.Text}篇相比，相同{equal}字元" +
 								$"、移除{deleted.Count()}字元、插入{inserted.Count()}字元。";
