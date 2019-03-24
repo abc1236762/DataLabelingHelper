@@ -534,8 +534,8 @@ namespace DataLabelingHelper
 		}
 
 		private void AddMatchText() {
-			this.MatchesTextBox.Text = this.MatchesTextBox.Text.Trim()
-				+ " " + Regex.Escape(this.selectedText.Trim()).Trim();
+			this.MatchesTextBox.Text = (this.MatchesTextBox.Text.Trim()
+				+ " " + Regex.Escape(this.selectedText.Trim())).Trim();
 		}
 
 		private void AddMatchButton_Click(object sender, RoutedEventArgs e) =>
