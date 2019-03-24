@@ -533,15 +533,16 @@ namespace DataLabelingHelper
 			else this.MarkDocument();
 		}
 
-		private void AddMatchButton_Click(object sender, RoutedEventArgs e) {
-			this.MatchesTextBox.Text = (this.MatchesTextBox.Text +
-				" " + Regex.Escape(this.selectedText.Replace(" ", ""))).Trim();
+		private void AddMatchText() {
+			this.MatchesTextBox.Text = this.MatchesTextBox.Text.Trim()
+				+ " " + Regex.Escape(this.selectedText.Trim());
 		}
 
+		private void AddMatchButton_Click(object sender, RoutedEventArgs e) =>
+			this.AddMatchText();
+
 		private void QATextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
-			if (e.Key == Key.Enter || e.Key == Key.Space)
-				this.MatchesTextBox.Text = (this.MatchesTextBox.Text +
-					" " + Regex.Escape(this.selectedText.Replace(" ", ""))).Trim();
+			if (e.Key == Key.Enter || e.Key == Key.Space) this.AddMatchText();
 		}
 
 		private void UpdateResultCount() {
