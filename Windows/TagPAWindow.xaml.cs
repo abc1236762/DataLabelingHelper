@@ -134,6 +134,8 @@ namespace DataLabelingHelper
 			Item newItem = this.data[questionID];
 			var untaggedDocuments = newItem.DocumentNames.ToHashSet();
 			bool isTotallySame = false;
+			int count = 0;
+			List<string> others = new List<string>();
 			foreach (KeyValuePair<string, Item> pair in this.data) {
 				if (pair.Key == questionID) break;
 				Item item = pair.Value;
@@ -152,28 +154,31 @@ namespace DataLabelingHelper
 					message += String.Join("、", newItem.DocumentNames) +
 						"。\n與以下的Question ID的問題重複！\n";
 				}
-
-				this.duplicateQuestionIDs.Add(pair.Key);
-				string answer = Regex.Replace(item.Options[item.AnswerID], @"^\s*\(\S\)\s*", "");
-				answer = answer == newAnswer ? "一致" : $"「{answer}」";
-				message += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
-				var excepedOptions = options.Except(newOptions);
-				if (excepedOptions.Count() == 0) message += "完全一致";
-				else {
-					message += $"不一致「{String.Join("／", excepedOptions)}」";
-					var sameOptions = options.Except(excepedOptions);
-					if (sameOptions.Count() > 0) message += $"、一致「{String.Join("／", sameOptions)}」";
-				}
-				message += $"。\n\t文章：";
-				var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
-				if (excepedDocumentNames.Count() == 0) message += "完全一致。";
-				else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
-				foreach (var name in item.DocumentNames)
-					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
-				if (answer == "一致" && excepedOptions.Count() == 0 && excepedDocumentNames.Count() == 0)
-					isTotallySame = true;
+				if (count < 10) {
+					this.duplicateQuestionIDs.Add(pair.Key);
+					string answer = Regex.Replace(item.Options[item.AnswerID], @"^\s*\(\S\)\s*", "");
+					answer = answer == newAnswer ? "一致" : $"「{answer}」";
+					message += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
+					var excepedOptions = options.Except(newOptions);
+					if (excepedOptions.Count() == 0) message += "完全一致";
+					else {
+						message += $"不一致「{String.Join("／", excepedOptions)}」";
+						var sameOptions = options.Except(excepedOptions);
+						if (sameOptions.Count() > 0) message += $"、一致「{String.Join("／", sameOptions)}」";
+					}
+					message += $"。\n\t文章：";
+					var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
+					if (excepedDocumentNames.Count() == 0) message += "完全一致。";
+					else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
+					foreach (var name in item.DocumentNames)
+						if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
+					if (answer == "一致" && excepedOptions.Count() == 0 && excepedDocumentNames.Count() == 0)
+						isTotallySame = true;
+				} else others.Add(pair.Key);
+				count++;
 			}
 			if (!String.IsNullOrEmpty(message)) {
+				if (count >= 10) message += $"\n和{String.Join("、", others)}。\n";
 				if (untaggedDocuments.Count > 0) {
 					message += $"\n\nQuestion ID {this.questionID}還有未標記過的文章「";
 					message += String.Join("、", untaggedDocuments) + "」，";
@@ -325,7 +330,11 @@ namespace DataLabelingHelper
 			if (this.questionID is null) return;
 			this.SaveSettings();
 			this.NumberRun.Text = (this.CurrentComboBox.SelectedIndex + 1).ToString();
-			if (this.IsDataItemDuplicate(this.questionID, true)) this.CurrentComboBox.SelectedIndex += 1;
+			if (this.IsDataItemDuplicate(this.questionID, true)) {
+				if (this.CurrentComboBox.SelectedIndex < this.CurrentComboBox.Items.Count - 1)
+					this.CurrentComboBox.SelectedIndex += 1;
+				else this.CurrentComboBox.SelectedIndex = -1;
+			}
 			this.QuestionTextBox.Text = String.Empty;
 			this.AnswerTextBox.Text = String.Empty;
 			this.ContextWrapPanel.Children.Clear();
@@ -346,7 +355,7 @@ namespace DataLabelingHelper
 				this.PreviousButton.IsEnabled = true;
 				this.NextButton.IsEnabled = false;
 			}
-
+			if (this.CurrentComboBox.SelectedIndex < 0) return;
 			this.ProcessTextBlock.Text =
 				$"{(this.data.Keys.ToList().IndexOf(this.questionID) + 1) * 100D / this.data.Count:F2}%";
 			this.QuestionTextBox.Text = this.data[this.questionID].Question;
