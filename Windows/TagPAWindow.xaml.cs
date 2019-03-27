@@ -154,26 +154,28 @@ namespace DataLabelingHelper
 					message += String.Join("、", newItem.DocumentNames) +
 						"。\n與以下的Question ID的問題重複！\n";
 				}
+				string newMessage = String.Empty;
+				this.duplicateQuestionIDs.Add(pair.Key);
+				string answer = Regex.Replace(item.Options[item.AnswerID], @"^\s*\(\S\)\s*", "");
+				answer = answer == newAnswer ? "一致" : $"「{answer}」";
+				newMessage += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
+				var excepedOptions = options.Except(newOptions);
+				if (excepedOptions.Count() == 0) newMessage += "完全一致";
+				else {
+					newMessage += $"不一致「{String.Join("／", excepedOptions)}」";
+					var sameOptions = options.Except(excepedOptions);
+					if (sameOptions.Count() > 0) newMessage += $"、一致「{String.Join("／", sameOptions)}」";
+				}
+				newMessage += $"。\n\t文章：";
+				var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
+				if (excepedDocumentNames.Count() == 0) newMessage += "完全一致。";
+				else newMessage += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
+				foreach (var name in item.DocumentNames)
+					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
+				if (answer == "一致" && excepedOptions.Count() == 0 && excepedDocumentNames.Count() == 0)
+					isTotallySame = true;
 				if (count < 10) {
-					this.duplicateQuestionIDs.Add(pair.Key);
-					string answer = Regex.Replace(item.Options[item.AnswerID], @"^\s*\(\S\)\s*", "");
-					answer = answer == newAnswer ? "一致" : $"「{answer}」";
-					message += $"\n{pair.Key}的\t選項：答案{answer}；其他選項";
-					var excepedOptions = options.Except(newOptions);
-					if (excepedOptions.Count() == 0) message += "完全一致";
-					else {
-						message += $"不一致「{String.Join("／", excepedOptions)}」";
-						var sameOptions = options.Except(excepedOptions);
-						if (sameOptions.Count() > 0) message += $"、一致「{String.Join("／", sameOptions)}」";
-					}
-					message += $"。\n\t文章：";
-					var excepedDocumentNames = newItem.DocumentNames.Except(item.DocumentNames);
-					if (excepedDocumentNames.Count() == 0) message += "完全一致。";
-					else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
-					foreach (var name in item.DocumentNames)
-						if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
-					if (answer == "一致" && excepedOptions.Count() == 0 && excepedDocumentNames.Count() == 0)
-						isTotallySame = true;
+					message += newMessage;
 				} else others.Add(pair.Key);
 				count++;
 			}
