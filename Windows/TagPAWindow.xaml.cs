@@ -23,13 +23,13 @@ namespace DataLabelingHelper
 	/// </summary>
 	public partial class TagPAWindow : Window
 	{
-		private struct Item
+		private class Item
 		{
 			public readonly string Question;
 			public readonly string[] DocumentNames;
 			public readonly int AnswerID;
 			public readonly Dictionary<int, string> Options;
-			public readonly bool IsDuplicate;
+			public bool IsDuplicate;
 
 			public Item(string[] data, bool isDuplicate) {
 				for (int i = 0; i < data.Length; i++)
@@ -127,15 +127,15 @@ namespace DataLabelingHelper
 			}
 		}
 
-		private bool IsDataItemDuplicate() {
+		private bool IsDataItemDuplicate(string questionID, bool haveMessage) {
 			this.duplicateQuestionIDs.Clear();
 			var result = MessageBoxResult.None;
 			string message = String.Empty;
-			Item newItem = this.data[this.questionID];
+			Item newItem = this.data[questionID];
 			var untaggedDocuments = newItem.DocumentNames.ToHashSet();
 			bool isTotallySame = false;
 			foreach (KeyValuePair<string, Item> pair in this.data) {
-				if (pair.Key == this.questionID) break;
+				if (pair.Key == questionID) break;
 				Item item = pair.Value;
 				if (Regex.Replace(item.Question, @"[，。？：（）,.?:()\s]", "").ToLower() !=
 					Regex.Replace(newItem.Question, @"[，。？：（）,.?:()\s]", "").ToLower()) continue;
@@ -145,8 +145,8 @@ namespace DataLabelingHelper
 					.Select(x => Regex.Replace(x.Value, @"^\s*\(\S\)\s*", ""));
 				string newAnswer = Regex.Replace(newItem.Options[newItem.AnswerID], @"^\s*\(\S\)\s*", "");
 				if (String.IsNullOrEmpty(message)) {
-					message += $"Question ID {this.questionID}「{newItem.Question}」";
-					message += $"\n{this.questionID}的\t選項：答案「{newAnswer}」；其他選項「";
+					message += $"Question ID {questionID}「{newItem.Question}」";
+					message += $"\n{questionID}的\t選項：答案「{newAnswer}」；其他選項「";
 					message += String.Join("／", newOptions) + "」。";
 					message += $"\n\t文章：";
 					message += String.Join("、", newItem.DocumentNames) +
@@ -170,7 +170,8 @@ namespace DataLabelingHelper
 				else message += $"沒有「{String.Join("、", excepedDocumentNames)}」。";
 				foreach (var name in item.DocumentNames)
 					if (untaggedDocuments.Contains(name)) untaggedDocuments.Remove(name);
-				if (answer == "一致" && excepedOptions.Count() == 0) isTotallySame = true;
+				if (answer == "一致" && excepedOptions.Count() == 0 && excepedDocumentNames.Count() == 0)
+					isTotallySame = true;
 			}
 			if (!String.IsNullOrEmpty(message)) {
 				if (untaggedDocuments.Count > 0) {
@@ -178,10 +179,14 @@ namespace DataLabelingHelper
 					message += String.Join("、", untaggedDocuments) + "」，";
 				} else message += $"\n\nQuestion ID {this.questionID}已無未標記過的文章，";
 				if (isTotallySame) message += "有所有選項完全一致的項目，";
-				message += "是否跳過？";
-				while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
-					result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
-						MessageBoxImage.Warning, MessageBoxResult.None);
+				if (haveMessage) {
+					message += "是否跳過？";
+					while (result != MessageBoxResult.Yes && result != MessageBoxResult.No)
+						result = MessageBox.Show(message, "重複警告", MessageBoxButton.YesNo,
+							MessageBoxImage.Warning, MessageBoxResult.None);
+				} else {
+					result = isTotallySame ? MessageBoxResult.Yes : MessageBoxResult.None;
+				}
 			}
 			return result == MessageBoxResult.Yes;
 		}
@@ -200,6 +205,9 @@ namespace DataLabelingHelper
 				string line = String.Join(",", row.Skip(1));
 				this.data.Add(row[0], new Item(row.Clone() as string[], lines.ContainsValue(line)));
 				lines.Add(row[0], String.Join(",", row.Skip(1)));
+			}
+			foreach (var pair in this.data) {
+				this.data[pair.Key].IsDuplicate = this.IsDataItemDuplicate(pair.Key, false);
 			}
 		}
 
@@ -317,8 +325,7 @@ namespace DataLabelingHelper
 			if (this.questionID is null) return;
 			this.SaveSettings();
 			this.NumberRun.Text = (this.CurrentComboBox.SelectedIndex + 1).ToString();
-			if (this.IsDataItemDuplicate()) this.CurrentComboBox.SelectedIndex += 1;
-
+			if (this.IsDataItemDuplicate(this.questionID, true)) this.CurrentComboBox.SelectedIndex += 1;
 			this.QuestionTextBox.Text = String.Empty;
 			this.AnswerTextBox.Text = String.Empty;
 			this.ContextWrapPanel.Children.Clear();
@@ -372,7 +379,7 @@ namespace DataLabelingHelper
 					var inserted = diff.Where(x => x.Status == DiffStatus.Inserted);
 					var deleted = diff.Where(x => x.Status == DiffStatus.Deleted);
 					if (context1 == context2 || (inserted.Count() <= 10 && deleted.Count() <= 10)) {
-						if (context1 != context2 && (inserted.Count() > 2 || deleted.Count() > 2)) {
+						if (context1 != context2 && (inserted.Count() > 5 || deleted.Count() > 5)) {
 							item.UpdateLineRunText();
 							string message = $"第{i:D2}篇文章與第{item.LineRun.Text}篇相比，相同{equal}字元" +
 								$"、移除{deleted.Count()}字元、插入{inserted.Count()}字元。";
